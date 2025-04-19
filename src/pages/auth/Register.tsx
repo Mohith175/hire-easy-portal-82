@@ -1,414 +1,230 @@
-
 import React, { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
-import { 
-  Eye, 
-  EyeOff, 
-  Briefcase, 
-  User, 
-  ShieldCheck, 
-  Check, 
-  X 
-} from "lucide-react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-
-// Define the form schema
-const RegisterFormSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
-  confirmPassword: z.string(),
-  contactNum: z.string().min(10, "Contact number must be at least 10 digits"),
-  country: z.string().min(2, "Country must be at least 2 characters"),
-  city: z.string().min(2, "City must be at least 2 characters"),
-  pincode: z.string().min(5, "Pincode must be at least 5 characters"),
-  state: z.string().min(2, "State must be at least 2 characters"),
-  street: z.string().min(2, "Street must be at least 2 characters"),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
-type RegisterFormValues = z.infer<typeof RegisterFormSchema>;
 
 const Register = () => {
+  const [userType, setUserType] = useState<"EMPLOYER" | "EMPLOYEE">("EMPLOYEE");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const { register: registerUser } = useAuth();
-  
-  const [role, setRole] = useState<UserRole>(() => {
-    // Get role from URL query param if available
-    const params = new URLSearchParams(location.search);
-    const roleParam = params.get('role');
-    if (roleParam === "ADMIN" || roleParam === "EMPLOYER" || roleParam === "EMPLOYEE") {
-      return roleParam;
-    }
-    return "EMPLOYEE";
-  });
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  
-  // Initialize the form
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(RegisterFormSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      contactNum: "",
-      country: "",
-      city: "",
-      pincode: "",
-      state: "",
-      street: "",
-    },
-  });
-  
-  const onSubmit = async (values: RegisterFormValues) => {
-    setIsLoading(true);
-    
-    try {
-      // Remove confirmPassword before sending to API
-      const { confirmPassword, ...formData } = values;
-      
-      await registerUser(formData, role);
-      
-      // Registration successful, redirect to login page
+  const { register } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
       toast({
-        title: "Registration successful",
-        description: "Your account has been created. You can now login.",
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
       });
-      
-      navigate(`/login?role=${role}`);
-    } catch (error) {
-      console.error("Registration error:", error);
-      // Toast notification is handled in the useAuth hook
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await register(firstName, lastName, email, password, userType);
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Registration failed",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-  
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Create Your Account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join our platform and unlock new opportunities
-          </p>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create your account
+        </h2>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <div className="mb-6">
+            <label className="text-sm font-medium text-gray-700">I am a:</label>
+            <div className="mt-2 grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant={userType === "EMPLOYEE" ? "default" : "outline"}
+                className="w-full"
+                onClick={() => setUserType("EMPLOYEE")}
+              >
+                Job Seeker
+              </Button>
+              <Button
+                type="button"
+                variant={userType === "EMPLOYER" ? "default" : "outline"}
+                className="w-full"
+                onClick={() => setUserType("EMPLOYER")}
+              >
+                Employer
+              </Button>
+            </div>
+          </div>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                First name
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Last name
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email address
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm password
+              </label>
+              <div className="mt-1">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating account..." : "Create Account"}
+              </Button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-gray-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              <div>
+                <a
+                  href="#"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  Google
+                </a>
+              </div>
+
+              <div>
+                <a
+                  href="#"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  Facebook
+                </a>
+              </div>
+
+              <div>
+                <a
+                  href="#"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  Twitter
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <Tabs defaultValue={role.toLowerCase()} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger 
-              value="employee" 
-              onClick={() => setRole("EMPLOYEE")}
-              className="flex items-center gap-2"
-            >
-              <User size={16} />
-              Job Seeker
-            </TabsTrigger>
-            <TabsTrigger 
-              value="employer" 
-              onClick={() => setRole("EMPLOYER")}
-              className="flex items-center gap-2"
-            >
-              <Briefcase size={16} />
-              Employer
-            </TabsTrigger>
-            <TabsTrigger 
-              value="admin" 
-              onClick={() => setRole("ADMIN")}
-              className="flex items-center gap-2"
-            >
-              <ShieldCheck size={16} />
-              Admin
-            </TabsTrigger>
-          </TabsList>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Sign Up</CardTitle>
-              <CardDescription>
-                {role === "EMPLOYEE" && "Create your job seeker account to find your next opportunity"}
-                {role === "EMPLOYER" && "Register your company to post jobs and find talent"}
-                {role === "ADMIN" && "Create an administrator account to manage the platform"}
-              </CardDescription>
-            </CardHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="name@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input 
-                                type={showPassword ? "text" : "password"} 
-                                placeholder="••••••••" 
-                                {...field} 
-                              />
-                              <button
-                                type="button"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                              </button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type={showPassword ? "text" : "password"} 
-                              placeholder="••••••••" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="contactNum"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Contact Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+1 (555) 123-4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="country"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Country</FormLabel>
-                          <FormControl>
-                            <Input placeholder="United States" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>City</FormLabel>
-                          <FormControl>
-                            <Input placeholder="New York" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>State</FormLabel>
-                          <FormControl>
-                            <Input placeholder="NY" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="pincode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Pincode / ZIP</FormLabel>
-                          <FormControl>
-                            <Input placeholder="10001" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="street"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Street Address</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123 Main St, Apt 4B" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  {/* Password requirements */}
-                  <div className="text-sm text-gray-500 space-y-2">
-                    <p className="font-medium">Password requirements:</p>
-                    <ul className="space-y-1">
-                      <li className="flex items-center">
-                        {form.getValues().password.length >= 8 ? (
-                          <Check size={16} className="text-green-500 mr-2" />
-                        ) : (
-                          <X size={16} className="text-red-500 mr-2" />
-                        )}
-                        At least 8 characters
-                      </li>
-                      <li className="flex items-center">
-                        {/[A-Z]/.test(form.getValues().password) ? (
-                          <Check size={16} className="text-green-500 mr-2" />
-                        ) : (
-                          <X size={16} className="text-red-500 mr-2" />
-                        )}
-                        At least one uppercase letter
-                      </li>
-                      <li className="flex items-center">
-                        {/[a-z]/.test(form.getValues().password) ? (
-                          <Check size={16} className="text-green-500 mr-2" />
-                        ) : (
-                          <X size={16} className="text-red-500 mr-2" />
-                        )}
-                        At least one lowercase letter
-                      </li>
-                      <li className="flex items-center">
-                        {/\d/.test(form.getValues().password) ? (
-                          <Check size={16} className="text-green-500 mr-2" />
-                        ) : (
-                          <X size={16} className="text-red-500 mr-2" />
-                        )}
-                        At least one number
-                      </li>
-                    </ul>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-4">
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Creating Account...
-                      </>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                  <div className="text-center text-sm">
-                    Already have an account?{" "}
-                    <Link to="/login" className="font-medium text-primary hover:text-primary-600">
-                      Sign in
-                    </Link>
-                  </div>
-                </CardFooter>
-              </form>
-            </Form>
-          </Card>
-        </Tabs>
       </div>
     </div>
   );
