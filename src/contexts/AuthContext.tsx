@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -18,7 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (firstName: string, lastName: string, email: string, password: string, role: UserRole) => Promise<void>;
+  register: (data: any, role: UserRole) => Promise<void>;
   logout: () => void;
 }
 
@@ -98,25 +99,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (firstName: string, lastName: string, email: string, password: string, role: UserRole) => {
+  const register = async (data: any, role: UserRole) => {
     setIsLoading(true);
     try {
-      // Prepare data object according to the API requirements
-      const userData = {
-        firstName,
-        lastName,
-        email,
-        password,
-        role
-      };
-
       // This must match your backend's registration endpoint and payload structure
       const response = await fetch(`${API_URL}/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          ...data,
+          role: role
+        }),
       });
 
       if (!response.ok) {
