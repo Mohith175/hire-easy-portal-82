@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -38,7 +37,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ status, showProgr
       case "SHORTLISTED":
         return "default";
       case "SELECTED":
-        return "success";
+        return "default"; // Changed from 'success' to 'default'
       case "REJECTED":
         return "destructive";
       default:

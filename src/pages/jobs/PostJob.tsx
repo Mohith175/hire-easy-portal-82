@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -12,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createJob, getJobCategories, JobCategory } from "@/services/jobService";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Buildings, MapPin, BadgeDollarSign, Trophy, Bookmark } from "lucide-react";
+import { Briefcase, Building, MapPin, BadgeDollarSign, Trophy, Bookmark } from "lucide-react";
 
 const PostJob = () => {
   const navigate = useNavigate();
@@ -33,21 +32,19 @@ const PostJob = () => {
     jobcategoryId: 0,
   });
   
-  // Fetch job categories
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     queryKey: ['jobCategories'],
     queryFn: getJobCategories
   });
   
-  // Create job mutation
   const createJobMutation = useMutation({
     mutationFn: () => {
       if (!user) throw new Error("User not authenticated");
       
       return createJob({
         ...formData,
-        employerId: user.id, // In our simplified model, user.id is used as employerId
-        logoPath: "" // This could be enhanced with logo upload
+        employerId: user.id,
+        logoPath: ""
       });
     },
     onSuccess: () => {
@@ -83,7 +80,6 @@ const PostJob = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
     if (!formData.title || !formData.companyName || !formData.jobDescription || !formData.jobcategoryId) {
       toast({
         title: "Missing information",
@@ -96,7 +92,6 @@ const PostJob = () => {
     createJobMutation.mutate();
   };
   
-  // Redirect if not authenticated
   React.useEffect(() => {
     if (!user) {
       toast({
@@ -109,7 +104,7 @@ const PostJob = () => {
   }, [user, navigate]);
   
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null;
   }
   
   return (
@@ -133,7 +128,6 @@ const PostJob = () => {
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-6">
-              {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Basic Information</h3>
                 
@@ -229,7 +223,6 @@ const PostJob = () => {
                 </div>
               </div>
               
-              {/* Job Details */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Job Details</h3>
                 
@@ -289,7 +282,6 @@ const PostJob = () => {
                 </div>
               </div>
               
-              {/* Location Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Location Information</h3>
                 

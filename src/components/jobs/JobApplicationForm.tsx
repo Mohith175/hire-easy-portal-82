@@ -1,10 +1,9 @@
-
-import React, { useState } from "react";
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { PaperPlaneIcon, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Resume, applyForJob } from "@/services/jobService";
 import { getUserResumes } from "@/services/jobService";
@@ -23,14 +22,12 @@ const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle
   const [selectedResumeId, setSelectedResumeId] = useState<number | undefined>();
   const [showResumeUpload, setShowResumeUpload] = useState(false);
 
-  // Fetch user's resumes
   const { data: resumes } = useQuery({
     queryKey: ['userResumes', user?.id],
     queryFn: () => user ? getUserResumes(user.id) : Promise.resolve([]),
     enabled: !!user,
   });
 
-  // Apply for job mutation
   const applyMutation = useMutation({
     mutationFn: () => {
       if (!user) throw new Error("User not authenticated");
@@ -199,7 +196,7 @@ const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle
               </>
             ) : (
               <>
-                <PaperPlaneIcon className="mr-2 h-4 w-4" />
+                <Send className="mr-2 h-4 w-4" />
                 Submit Application
               </>
             )}
