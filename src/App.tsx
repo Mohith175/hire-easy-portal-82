@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,28 +11,19 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
-// Dashboard Pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import EmployerDashboard from "./pages/employer/Dashboard";
-import EmployeeDashboard from "./pages/employee/Dashboard";
-
 // Job Pages
 import Jobs from "./pages/jobs/Jobs";
 import JobDetails from "./pages/jobs/JobDetails";
-import PostJob from "./pages/employer/PostJob";
+import PostJob from "./pages/jobs/PostJob";
 
-// Profile Pages
-import EmployerProfile from "./pages/employer/Profile";
-import EmployeeProfile from "./pages/employee/Profile";
+// User Pages
+import Profile from "./pages/user/Profile";
+import MyApplications from "./pages/user/MyApplications";
+import MyJobs from "./pages/user/MyJobs";
 
-// Applications Pages
-import Applications from "./pages/employer/Applications";
-import MyApplications from "./pages/employee/MyApplications";
-
-// Category Management
+// Admin Management Pages (we keep these for now)
+import AdminDashboard from "./pages/admin/Dashboard";
 import Categories from "./pages/admin/Categories";
-
-// Admin Management Pages
 import ManageEmployers from "./pages/admin/ManageEmployers";
 import ManageEmployees from "./pages/admin/ManageEmployees";
 import AdminProfilePage from "./pages/admin/Profile";
@@ -65,7 +55,43 @@ const App = () => (
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetails />} />
             
-            {/* Admin Routes */}
+            {/* Job Management */}
+            <Route 
+              path="/jobs/post" 
+              element={
+                <ProtectedRoute allowedRoles={["*"]}>
+                  <PostJob />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* User Routes */}
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute allowedRoles={["*"]}>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/applications" 
+              element={
+                <ProtectedRoute allowedRoles={["*"]}>
+                  <MyApplications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-jobs" 
+              element={
+                <ProtectedRoute allowedRoles={["*"]}>
+                  <MyJobs />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes - These are kept for now */}
             <Route 
               path="/admin/dashboard" 
               element={
@@ -103,66 +129,6 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <AdminProfilePage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Employer Routes */}
-            <Route 
-              path="/employer/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-                  <EmployerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employer/post-job" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-                  <PostJob />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employer/applications" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-                  <Applications />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employer/profile" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-                  <EmployerProfile />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Employee Routes */}
-            <Route 
-              path="/employee/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-                  <EmployeeDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employee/profile" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-                  <EmployeeProfile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employee/applications" 
-              element={
-                <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-                  <MyApplications />
                 </ProtectedRoute>
               } 
             />

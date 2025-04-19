@@ -32,7 +32,7 @@ const Jobs = () => {
   const [showFilters, setShowFilters] = useState(false);
   
   // Fetch jobs
-  const { data: jobs, isLoading, error } = useQuery({
+  const { data: jobs, isLoading, error, refetch } = useQuery({
     queryKey: ['jobs'],
     queryFn: getJobs
   });
@@ -242,6 +242,15 @@ const Jobs = () => {
             ))}
           </div>
         )}
+
+        <div className="mt-8 text-center">
+          <Link to="/jobs/post">
+            <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Briefcase className="mr-2 h-5 w-5" />
+              Post a New Job
+            </Button>
+          </Link>
+        </div>
       </div>
     </MainLayout>
   );

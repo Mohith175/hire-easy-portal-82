@@ -3,14 +3,11 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 
 // Define user types based on the API schema
-export type UserRole = "ADMIN" | "EMPLOYER" | "EMPLOYEE";
-
 export interface AuthUser {
   id: number;
   firstName: string;
   lastName: string;
   email: string;
-  role: UserRole;
   token: string;
 }
 
@@ -19,7 +16,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: any, role: UserRole) => Promise<void>;
+  register: (data: any) => Promise<void>;
   logout: () => void;
 }
 
@@ -74,7 +71,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        role: data.roles[0]?.name || "EMPLOYEE",  // Assuming the first role is the primary one
         token: data.token
       };
 
@@ -99,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (data: any, role: UserRole) => {
+  const register = async (data: any) => {
     setIsLoading(true);
     try {
       // This must match your backend's registration endpoint and payload structure
@@ -108,10 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...data,
-          role: role
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {

@@ -11,7 +11,9 @@ import {
   LogOut, 
   X,
   Search,
-  Bell
+  Bell,
+  FilePlus,
+  FileCheck
 } from "lucide-react";
 
 interface MainLayoutProps {
@@ -46,76 +48,37 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             className="flex items-center px-4 py-2 hover:text-primary transition-colors"
           >
             <Briefcase size={18} className="mr-2" />
-            Jobs
+            Browse Jobs
           </Link>
         </li>
         
-        {isAuthenticated && user?.role === "ADMIN" && (
+        {isAuthenticated && (
           <>
             <li>
               <Link 
-                to="/admin/dashboard" 
+                to="/jobs/post" 
                 className="flex items-center px-4 py-2 hover:text-primary transition-colors"
               >
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/admin/categories" 
-                className="flex items-center px-4 py-2 hover:text-primary transition-colors"
-              >
-                Categories
-              </Link>
-            </li>
-          </>
-        )}
-        
-        {isAuthenticated && user?.role === "EMPLOYER" && (
-          <>
-            <li>
-              <Link 
-                to="/employer/dashboard" 
-                className="flex items-center px-4 py-2 hover:text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/employer/post-job" 
-                className="flex items-center px-4 py-2 hover:text-primary transition-colors"
-              >
+                <FilePlus size={18} className="mr-2" />
                 Post Job
               </Link>
             </li>
             <li>
               <Link 
-                to="/employer/applications" 
+                to="/applications" 
                 className="flex items-center px-4 py-2 hover:text-primary transition-colors"
               >
-                Applications
-              </Link>
-            </li>
-          </>
-        )}
-        
-        {isAuthenticated && user?.role === "EMPLOYEE" && (
-          <>
-            <li>
-              <Link 
-                to="/employee/dashboard" 
-                className="flex items-center px-4 py-2 hover:text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/employee/applications" 
-                className="flex items-center px-4 py-2 hover:text-primary transition-colors"
-              >
+                <FileCheck size={18} className="mr-2" />
                 My Applications
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/my-jobs" 
+                className="flex items-center px-4 py-2 hover:text-primary transition-colors"
+              >
+                <Briefcase size={18} className="mr-2" />
+                My Jobs
               </Link>
             </li>
           </>
@@ -149,13 +112,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <Bell className="text-gray-600 hover:text-primary cursor-pointer transition-colors" />
                   <div className="relative">
                     <Link 
-                      to={`/${user?.role.toLowerCase()}/profile`}
+                      to="/profile"
                       className="flex items-center space-x-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
-                        {user?.firstName.charAt(0)}
+                        {user?.firstName?.charAt(0) || "U"}
                       </div>
-                      <span className="font-medium">{user?.firstName}</span>
+                      <span className="font-medium">{user?.firstName || "User"}</span>
                     </Link>
                   </div>
                   <Button 
@@ -204,7 +167,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 {isAuthenticated ? (
                   <div className="space-y-2">
                     <Link 
-                      to={`/${user?.role.toLowerCase()}/profile`}
+                      to="/profile"
                       className="flex items-center space-x-2 p-2"
                     >
                       <User size={18} />
@@ -256,15 +219,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <ul className="space-y-2">
                 <li><Link to="/jobs" className="text-gray-300 hover:text-white">Browse Jobs</Link></li>
                 <li><Link to="/register" className="text-gray-300 hover:text-white">Create Account</Link></li>
-                <li><Link to="/login" className="text-gray-300 hover:text-white">Job Seeker Login</Link></li>
+                <li><Link to="/login" className="text-gray-300 hover:text-white">Sign In</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">For Employers</h4>
               <ul className="space-y-2">
-                <li><Link to="/register" className="text-gray-300 hover:text-white">Register Company</Link></li>
-                <li><Link to="/login" className="text-gray-300 hover:text-white">Employer Login</Link></li>
-                <li><Link to="/employer/post-job" className="text-gray-300 hover:text-white">Post a Job</Link></li>
+                <li><Link to="/jobs/post" className="text-gray-300 hover:text-white">Post a Job</Link></li>
+                <li><Link to="/my-jobs" className="text-gray-300 hover:text-white">Manage Jobs</Link></li>
+                <li><Link to="/register" className="text-gray-300 hover:text-white">Create Account</Link></li>
               </ul>
             </div>
             <div>
