@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -271,7 +272,7 @@ const ApplicationRow: React.FC<ApplicationRowProps> = ({ application }) => {
       
       <div className="flex items-center gap-2">
         <Select 
-          defaultValue={application.status} 
+          defaultValue={application.status || "PENDING"} 
           onValueChange={handleStatusChange}
         >
           <SelectTrigger className="w-[180px]">

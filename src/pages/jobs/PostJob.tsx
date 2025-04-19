@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -160,7 +161,7 @@ const PostJob = () => {
                         required
                         className="pl-9"
                       />
-                      <Buildings className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
                     </div>
                   </div>
                 </div>
@@ -168,7 +169,7 @@ const PostJob = () => {
                 <div className="space-y-2">
                   <Label htmlFor="jobcategoryId">Job Category *</Label>
                   <Select
-                    value={formData.jobcategoryId ? formData.jobcategoryId.toString() : ""}
+                    value={formData.jobcategoryId ? formData.jobcategoryId.toString() : "0"}
                     onValueChange={handleCategoryChange}
                     required
                   >
@@ -180,7 +181,7 @@ const PostJob = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {isCategoriesLoading ? (
-                        <SelectItem value="">Loading categories...</SelectItem>
+                        <SelectItem value="loading">Loading categories...</SelectItem>
                       ) : categories && categories.length > 0 ? (
                         categories.map((category: JobCategory) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
@@ -188,7 +189,7 @@ const PostJob = () => {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="">No categories available</SelectItem>
+                        <SelectItem value="none">No categories available</SelectItem>
                       )}
                     </SelectContent>
                   </Select>

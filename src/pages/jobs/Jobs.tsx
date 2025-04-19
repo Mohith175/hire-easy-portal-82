@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -31,26 +30,22 @@ const Jobs = () => {
   const [selectedJobType, setSelectedJobType] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
   
-  // Fetch jobs
   const { data: jobs, isLoading, error, refetch } = useQuery({
     queryKey: ['jobs'],
     queryFn: getJobs
   });
   
-  // Fetch job categories
   const { data: categories } = useQuery({
     queryKey: ['jobCategories'],
     queryFn: getJobCategories
   });
   
-  // Get unique locations from jobs
   const uniqueLocations = React.useMemo(() => {
     if (!jobs) return [];
     const locations = jobs.map(job => `${job.city}, ${job.country}`);
     return [...new Set(locations)].sort();
   }, [jobs]);
   
-  // Filter jobs based on search and filters
   const filteredJobs = React.useMemo(() => {
     if (!jobs) return [];
     
@@ -72,17 +67,14 @@ const Jobs = () => {
     });
   }, [jobs, searchTerm, selectedCategory, selectedLocation, selectedJobType]);
   
-  // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would trigger a search API call
     toast({
       title: "Search results",
       description: `Found ${filteredJobs.length} jobs matching your criteria.`,
     });
   };
   
-  // Clear all filters
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategory("");
@@ -117,7 +109,7 @@ const Jobs = () => {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any Location</SelectItem>
+                    <SelectItem value="any">Any Location</SelectItem>
                     {uniqueLocations.map((location, index) => (
                       <SelectItem key={index} value={location}>
                         {location}
@@ -156,7 +148,7 @@ const Jobs = () => {
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Category</SelectItem>
+                        <SelectItem value="any">Any Category</SelectItem>
                         {categories?.map((category) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
                             {category.title}
@@ -175,7 +167,7 @@ const Jobs = () => {
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Job Type</SelectItem>
+                        <SelectItem value="any">Any Job Type</SelectItem>
                         <SelectItem value="Full-time">Full-time</SelectItem>
                         <SelectItem value="Part-time">Part-time</SelectItem>
                         <SelectItem value="Contract">Contract</SelectItem>
@@ -262,7 +254,6 @@ interface JobCardProps {
 }
 
 const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
-  // Find the category name for this job
   const categoryName = categories.find(c => c.id === job.jobcategoryId)?.title || "Unknown Category";
   
   return (
@@ -317,7 +308,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
       <CardFooter className="bg-gray-50 flex justify-between items-center">
         <div className="text-sm text-gray-500 flex items-center">
           <Calendar size={16} className="mr-2" />
-          <span>Posted recently</span> {/* In a real app, use actual posted date */}
+          <span>Posted recently</span>
         </div>
         <Link to={`/jobs/${job.id}`}>
           <Button variant="outline">View Details</Button>
