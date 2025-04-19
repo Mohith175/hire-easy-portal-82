@@ -1,103 +1,62 @@
 
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, EyeOff, Briefcase, User } from "lucide-react";
-
-interface LoginForm {
-  email: string;
-  password: string;
-  role: "EMPLOYER" | "EMPLOYEE" | "ADMIN";
-}
+import { 
+  Eye, 
+  EyeOff, 
+  Briefcase, 
+  User, 
+  ShieldCheck 
+} from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   
-  const [formData, setFormData] = useState<LoginForm>({
-    email: "",
-    password: "",
-    role: "EMPLOYEE"
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<UserRole>(() => {
+    // Get role from URL query param if available
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get('role');
+    if (roleParam === "ADMIN" || roleParam === "EMPLOYER" || roleParam === "EMPLOYEE") {
+      return roleParam;
+    }
+    return "EMPLOYEE";
   });
   
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // This is a mock login - in a real implementation, this would connect to your backend API
-      const response = await mockLogin(formData);
+      await login(email, password);
       
-      if (response.success) {
-        login(response.token, response.user);
-        
-        toast({
-          title: "Login successful",
-          description: "You have been logged in successfully.",
-          variant: "default",
-        });
-        
-        // Redirect based on user role
-        if (response.user.role === "ADMIN") {
-          navigate("/admin/dashboard");
-        } else if (response.user.role === "EMPLOYER") {
-          navigate("/employer/dashboard");
-        } else {
-          navigate("/employee/dashboard");
-        }
+      // Navigate to the appropriate dashboard based on role
+      if (role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "EMPLOYER") {
+        navigate("/employer/dashboard");
       } else {
-        toast({
-          title: "Login failed",
-          description: response.message,
-          variant: "destructive",
-        });
+        navigate("/employee/dashboard");
       }
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Login error:", error);
+      // Toast notification is handled in the useAuth hook
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  const handleRoleChange = (role: "EMPLOYER" | "EMPLOYEE") => {
-    setFormData({ ...formData, role });
-  };
-  
-  // Mock login function (replace with actual API call)
-  const mockLogin = async (data: LoginForm) => {
-    // In a real app, this would be an API call
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-    
-    // For demo purposes, auto-login with any credentials
-    return {
-      success: true,
-      token: "mock-jwt-token",
-      user: {
-        id: 1,
-        firstName: "John",
-        lastName: "Doe",
-        email: data.email,
-        role: data.role
-      },
-      message: "Login successful"
-    };
   };
   
   return (
@@ -112,11 +71,11 @@ const Login = () => {
           </p>
         </div>
         
-        <Tabs defaultValue="employee" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+        <Tabs defaultValue={role.toLowerCase()} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger 
               value="employee" 
-              onClick={() => handleRoleChange("EMPLOYEE")}
+              onClick={() => setRole("EMPLOYEE")}
               className="flex items-center gap-2"
             >
               <User size={16} />
@@ -124,11 +83,19 @@ const Login = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="employer" 
-              onClick={() => handleRoleChange("EMPLOYER")}
+              onClick={() => setRole("EMPLOYER")}
               className="flex items-center gap-2"
             >
               <Briefcase size={16} />
               Employer
+            </TabsTrigger>
+            <TabsTrigger 
+              value="admin" 
+              onClick={() => setRole("ADMIN")}
+              className="flex items-center gap-2"
+            >
+              <ShieldCheck size={16} />
+              Admin
             </TabsTrigger>
           </TabsList>
           
@@ -145,12 +112,11 @@ const Login = () => {
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    name="email"
                     type="email"
                     placeholder="name@example.com"
                     required
-                    value={formData.email}
-                    onChange={handleChange}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -158,12 +124,11 @@ const Login = () => {
                   <div className="relative">
                     <Input
                       id="password"
-                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       required
-                      value={formData.password}
-                      onChange={handleChange}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
                       type="button"
@@ -180,7 +145,7 @@ const Login = () => {
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                     />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                       Remember me
@@ -199,11 +164,21 @@ const Login = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Signing in..." : "Sign in"}
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
                 </Button>
                 <div className="text-center text-sm">
                   Don't have an account?{" "}
-                  <Link to="/register" className="font-medium text-primary hover:text-primary-600">
+                  <Link to={`/register?role=${role}`} className="font-medium text-primary hover:text-primary-600">
                     Create an account
                   </Link>
                 </div>

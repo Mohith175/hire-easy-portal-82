@@ -1,22 +1,30 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "@/components/ui/use-toast";
 
-interface AuthUser {
+// Define user types based on the API schema
+export type UserRole = "ADMIN" | "EMPLOYER" | "EMPLOYEE";
+
+export interface AuthUser {
   id: number;
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: UserRole;
+  token: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user: AuthUser) => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (data: any, role: UserRole) => Promise<void>;
   logout: () => void;
 }
+
+// API base URL - Replace with your actual Spring Boot backend URL
+const API_URL = "http://localhost:8080/api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -30,42 +38,119 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check for stored authentication on mount
-    const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
     
-    if (storedToken && storedUser) {
-      setToken(storedToken);
+    if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     
     setIsLoading(false);
   }, []);
 
-  const login = (token: string, user: AuthUser) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    setToken(token);
-    setUser(user);
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      
+      // Construct user object from API response
+      const authenticatedUser: AuthUser = {
+        id: data.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.roles[0]?.name || "EMPLOYEE",  // Assuming the first role is the primary one
+        token: data.token
+      };
+
+      // Store in local storage for persistence
+      localStorage.setItem("user", JSON.stringify(authenticatedUser));
+      setUser(authenticatedUser);
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: "Invalid credentials. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (data: any, role: UserRole) => {
+    setIsLoading(true);
+    try {
+      // This must match your backend's registration endpoint and payload structure
+      const response = await fetch(`${API_URL}/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          role: role
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Registration failed');
+      }
+
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created. You can now login.",
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration failed",
+        description: "Could not create your account. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setToken(null);
     setUser(null);
+    
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
   };
 
   const value = {
     user,
-    token,
-    isAuthenticated: !!token,
+    isAuthenticated: !!user,
     isLoading,
     login,
+    register,
     logout,
   };
 

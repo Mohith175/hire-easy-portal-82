@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +32,11 @@ import MyApplications from "./pages/employee/MyApplications";
 
 // Category Management
 import Categories from "./pages/admin/Categories";
+
+// Admin Management Pages
+import ManageEmployers from "./pages/admin/ManageEmployers";
+import ManageEmployees from "./pages/admin/ManageEmployees";
+import AdminProfilePage from "./pages/admin/Profile";
 
 // Protected Route Component
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -73,6 +79,30 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <Categories />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/employers" 
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <ManageEmployers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/employees" 
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <ManageEmployees />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/profile" 
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <AdminProfilePage />
                 </ProtectedRoute>
               } 
             />
