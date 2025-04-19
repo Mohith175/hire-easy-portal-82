@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,14 +26,12 @@ const MyJobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   
-  // Fetch user's posted jobs
   const { data: jobs, isLoading, error } = useQuery({
     queryKey: ['userJobs', user?.id],
     queryFn: () => user ? getUserJobs(user.id) : Promise.resolve([]),
     enabled: !!user,
   });
   
-  // Filter jobs based on search
   const filteredJobs = React.useMemo(() => {
     if (!jobs) return [];
     
@@ -48,7 +45,6 @@ const MyJobs = () => {
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Already filtered in the filteredJobs memo
   };
   
   if (!user) {
@@ -151,7 +147,6 @@ interface MyJobCardProps {
 const MyJobCard: React.FC<MyJobCardProps> = ({ job }) => {
   const [showApplications, setShowApplications] = useState(false);
   
-  // Fetch job applications
   const { data: applications, isLoading: isLoadingApplications } = useQuery({
     queryKey: ['jobApplications', job.id, showApplications],
     queryFn: () => getJobApplications(job.id),
@@ -159,7 +154,6 @@ const MyJobCard: React.FC<MyJobCardProps> = ({ job }) => {
   });
   
   const handleDelete = () => {
-    // In a real app, this would delete the job
     toast({
       title: "Job deleted",
       description: "The job has been successfully deleted.",
@@ -260,7 +254,6 @@ interface ApplicationRowProps {
 
 const ApplicationRow: React.FC<ApplicationRowProps> = ({ application }) => {
   const handleStatusChange = (status: string) => {
-    // In a real app, this would update the application status
     toast({
       title: "Status updated",
       description: `Application status changed to ${status}`,

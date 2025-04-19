@@ -1,9 +1,10 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Resume, applyForJob } from "@/services/jobService";
 import { getUserResumes } from "@/services/jobService";
