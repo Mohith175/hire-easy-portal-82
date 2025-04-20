@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Job {
@@ -16,7 +15,7 @@ export interface Job {
   country?: string;
   experience?: string;
   skills?: string;
-  jobcategoryId?: number;
+  jobcategoryId?: string; // Changed from number to string
   companyName?: string; // Alias for company_name
   jobDescription?: string; // Alias for description
   jobType?: string; // Alias for job_type
@@ -24,7 +23,7 @@ export interface Job {
 }
 
 export interface JobCategory {
-  id: number;
+  id: string; // Changed from number to string
   title: string;
   description: string;
 }
@@ -75,7 +74,8 @@ export const getJobs = async () => {
     country: job.location?.split(',')[1]?.trim() || job.location,
     // Default values for fields referenced in components
     skills: "Not specified",
-    experience: "Not specified"
+    experience: "Not specified",
+    jobcategoryId: "1" // Adding default jobcategoryId as string
   }));
 };
 
@@ -216,7 +216,7 @@ export const getJobApplications = async (jobId: string) => {
     .from('applications')
     .select(`
       *,
-      users:user_id (email)
+      users:user_id (id, email)
     `)
     .eq('job_id', jobId)
     .order('created_at', { ascending: false });
@@ -234,25 +234,25 @@ export const getJobApplications = async (jobId: string) => {
 // Mock functions for job categories until they're implemented in the database
 export const getJobCategories = async (): Promise<JobCategory[]> => {
   return [
-    { id: 1, title: 'Technology', description: 'Software development, IT, and technical roles' },
-    { id: 2, title: 'Design', description: 'UX/UI, graphic design, and creative roles' },
-    { id: 3, title: 'Marketing', description: 'Digital marketing, content creation, and brand management' },
-    { id: 4, title: 'Business', description: 'Business development, sales, and management roles' },
-    { id: 5, title: 'Customer Service', description: 'Customer support and service roles' }
+    { id: "1", title: 'Technology', description: 'Software development, IT, and technical roles' },
+    { id: "2", title: 'Design', description: 'UX/UI, graphic design, and creative roles' },
+    { id: "3", title: 'Marketing', description: 'Digital marketing, content creation, and brand management' },
+    { id: "4", title: 'Business', description: 'Business development, sales, and management roles' },
+    { id: "5", title: 'Customer Service', description: 'Customer support and service roles' }
   ];
 };
 
 export const createJobCategory = async (category: { title: string; description: string }): Promise<JobCategory> => {
   // Mock implementation
-  return { id: Math.floor(Math.random() * 1000) + 6, ...category };
+  return { id: String(Math.floor(Math.random() * 1000) + 6), ...category };
 };
 
-export const updateJobCategory = async (id: number, category: Partial<JobCategory>): Promise<JobCategory> => {
+export const updateJobCategory = async (id: string, category: Partial<JobCategory>): Promise<JobCategory> => {
   // Mock implementation
   return { id, title: category.title || '', description: category.description || '' };
 };
 
-export const deleteJobCategory = async (id: number): Promise<boolean> => {
+export const deleteJobCategory = async (id: string): Promise<boolean> => {
   // Mock implementation
   return true;
 };

@@ -54,9 +54,9 @@ const Jobs = () => {
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.jobDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.skills.toLowerCase().includes(searchTerm.toLowerCase());
+        job.skills?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = !selectedCategory || job.jobcategoryId.toString() === selectedCategory;
+      const matchesCategory = !selectedCategory || job.jobcategoryId === selectedCategory;
       
       const matchesLocation = !selectedLocation || 
         `${job.city}, ${job.country}`.toLowerCase().includes(selectedLocation.toLowerCase());

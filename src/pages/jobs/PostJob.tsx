@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -30,7 +29,7 @@ const PostJob = () => {
     city: "",
     pinCode: "",
     country: "",
-    jobcategoryId: 0,
+    jobcategoryId: "0",
   });
   
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
@@ -44,7 +43,7 @@ const PostJob = () => {
       
       return createJob({
         ...formData,
-        employerId: user.id,
+        employer_id: user.id,
         logoPath: ""
       });
     },
@@ -71,7 +70,7 @@ const PostJob = () => {
   };
   
   const handleCategoryChange = (value: string) => {
-    setFormData(prev => ({ ...prev, jobcategoryId: parseInt(value) }));
+    setFormData(prev => ({ ...prev, jobcategoryId: value }));
   };
   
   const handleJobTypeChange = (value: string) => {
@@ -169,7 +168,7 @@ const PostJob = () => {
                 <div className="space-y-2">
                   <Label htmlFor="jobcategoryId">Job Category *</Label>
                   <Select
-                    value={formData.jobcategoryId ? formData.jobcategoryId.toString() : "0"}
+                    value={formData.jobcategoryId}
                     onValueChange={handleCategoryChange}
                     required
                   >

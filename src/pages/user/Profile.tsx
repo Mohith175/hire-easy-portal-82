@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import MainLayout from "@/components/common/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -275,7 +274,7 @@ const Profile = () => {
           </TabsContent>
           
           <TabsContent value="resumes">
-            <ResumeUpload />
+            <ResumeUpload onSelect={(resumeId) => console.log(resumeId)} />
           </TabsContent>
           
           <TabsContent value="security">
