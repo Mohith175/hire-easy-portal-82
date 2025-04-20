@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -29,7 +30,7 @@ const PostJob = () => {
     city: "",
     pinCode: "",
     country: "",
-    jobcategoryId: "0",
+    jobcategoryId: "0", // Ensure this is a string
   });
   
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
@@ -43,7 +44,7 @@ const PostJob = () => {
       
       return createJob({
         ...formData,
-        employer_id: user.id,
+        employer_id: user.id, // Using employer_id instead of employerId
         logoPath: ""
       });
     },

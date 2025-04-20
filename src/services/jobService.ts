@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Job {
@@ -231,7 +232,7 @@ export const getJobApplications = async (jobId: string) => {
   }));
 };
 
-// Mock functions for job categories until they're implemented in the database
+// Job categories functions
 export const getJobCategories = async (): Promise<JobCategory[]> => {
   return [
     { id: "1", title: 'Technology', description: 'Software development, IT, and technical roles' },
