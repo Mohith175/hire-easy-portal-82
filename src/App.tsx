@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 // Auth Pages
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Auth from "./pages/auth/Auth";
 
 // Job Pages
 import Jobs from "./pages/jobs/Jobs";
@@ -50,6 +51,7 @@ const App = () => (
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/jobs" element={<Jobs />} />

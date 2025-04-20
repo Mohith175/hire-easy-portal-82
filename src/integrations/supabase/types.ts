@@ -9,7 +9,108 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string
+          resume_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id: string
+          resume_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          resume_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          company_name: string
+          created_at: string | null
+          description: string
+          employer_id: string | null
+          id: string
+          job_type: string
+          location: string
+          salary_range: string | null
+          title: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string | null
+          description: string
+          employer_id?: string | null
+          id?: string
+          job_type: string
+          location: string
+          salary_range?: string | null
+          title: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string | null
+          description?: string
+          employer_id?: string | null
+          id?: string
+          job_type?: string
+          location?: string
+          salary_range?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          file_name: string
+          file_url: string
+          id: string
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          file_name: string
+          file_url: string
+          id?: string
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          file_name?: string
+          file_url?: string
+          id?: string
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
