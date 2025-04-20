@@ -1,8 +1,9 @@
+
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { CheckCheck, Clock, ClipboardList, AlertTriangle, X } from "lucide-react";
 import { ApplicationStatus as StatusType } from "@/services/jobService";
-import { Check, Clock, X, Award, Activity } from "lucide-react";
 
 interface ApplicationStatusProps {
   status: StatusType;
@@ -10,75 +11,70 @@ interface ApplicationStatusProps {
 }
 
 const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ status, showProgress = false }) => {
-  // Progress percentage based on status
-  const getProgressPercentage = () => {
+  const getStatusColor = () => {
     switch (status) {
-      case "PENDING":
+      case "pending":
+        return "bg-gray-100 text-gray-700";
+      case "reviewing":
+        return "bg-blue-100 text-blue-700";
+      case "shortlisted":
+        return "bg-amber-100 text-amber-700";
+      case "selected":
+        return "bg-green-100 text-green-700";
+      case "rejected":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+  
+  const getStatusIcon = () => {
+    switch (status) {
+      case "pending":
+        return <Clock size={14} className="mr-1" />;
+      case "reviewing":
+        return <ClipboardList size={14} className="mr-1" />;
+      case "shortlisted":
+        return <AlertTriangle size={14} className="mr-1" />;
+      case "selected":
+        return <CheckCheck size={14} className="mr-1" />;
+      case "rejected":
+        return <X size={14} className="mr-1" />;
+      default:
+        return <Clock size={14} className="mr-1" />;
+    }
+  };
+  
+  const getProgressValue = () => {
+    switch (status) {
+      case "pending":
         return 20;
-      case "REVIEWING":
+      case "reviewing":
         return 40;
-      case "SHORTLISTED":
+      case "shortlisted":
         return 60;
-      case "SELECTED":
+      case "selected":
         return 100;
-      case "REJECTED":
+      case "rejected":
         return 100;
       default:
         return 0;
     }
   };
-
-  const getBadgeVariant = () => {
-    switch (status) {
-      case "PENDING":
-        return "outline";
-      case "REVIEWING":
-        return "secondary";
-      case "SHORTLISTED":
-        return "default";
-      case "SELECTED":
-        return "default"; // Changed from 'success' to 'default'
-      case "REJECTED":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case "PENDING":
-        return <Clock size={16} className="mr-1" />;
-      case "REVIEWING":
-        return <Activity size={16} className="mr-1" />;
-      case "SHORTLISTED":
-        return <Award size={16} className="mr-1" />;
-      case "SELECTED":
-        return <Check size={16} className="mr-1" />;
-      case "REJECTED":
-        return <X size={16} className="mr-1" />;
-      default:
-        return null;
-    }
-  };
-
-  const getBadgeText = () => {
-    return status.charAt(0) + status.slice(1).toLowerCase();
-  };
-
+  
   return (
-    <div className="space-y-2">
-      <Badge variant={getBadgeVariant()} className="flex items-center">
+    <div className="flex flex-col">
+      <Badge className={`${getStatusColor()} flex w-fit items-center capitalize`}>
         {getStatusIcon()}
-        {getBadgeText()}
+        {status}
       </Badge>
       
       {showProgress && (
-        <div className="space-y-1">
-          <Progress value={getProgressPercentage()} className="h-2" />
-          <p className="text-xs text-gray-500">
-            Application Progress: {getProgressPercentage()}%
-          </p>
+        <div className="mt-2">
+          <Progress
+            value={getProgressValue()}
+            className={`h-1.5 ${status === "rejected" ? "bg-red-100" : "bg-blue-100"}`}
+          />
         </div>
       )}
     </div>

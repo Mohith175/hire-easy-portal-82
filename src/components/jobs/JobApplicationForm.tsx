@@ -12,7 +12,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import ResumeUpload from "@/components/resume/ResumeUpload";
 
 interface JobApplicationFormProps {
-  jobId: number;
+  jobId: string;
   jobTitle: string;
   onSuccess?: () => void;
 }
@@ -20,7 +20,7 @@ interface JobApplicationFormProps {
 const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle, onSuccess }) => {
   const { user } = useAuth();
   const [coverLetter, setCoverLetter] = useState("");
-  const [selectedResumeId, setSelectedResumeId] = useState<number | undefined>();
+  const [selectedResumeId, setSelectedResumeId] = useState<string | undefined>();
   const [showResumeUpload, setShowResumeUpload] = useState(false);
 
   const { data: resumes } = useQuery({
@@ -142,7 +142,7 @@ const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle
                             onChange={() => setSelectedResumeId(resume.id)}
                           />
                           <label className="ml-2 block text-sm text-gray-900">
-                            {resume.fileName}
+                            {resume.file_name || resume.fileName}
                           </label>
                         </div>
                       </div>
