@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { Job, JobCategory, getAllJobs, getJobCategories } from "@/services/jobService";
+import { Job, JobCategory, getJobs, getJobCategories } from "@/services/jobService";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search,
@@ -32,7 +32,7 @@ const Jobs = () => {
   
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['jobs'],
-    queryFn: getAllJobs
+    queryFn: getJobs
   });
   
   const { data: categories = [] } = useQuery({
@@ -41,14 +41,11 @@ const Jobs = () => {
   });
   
   const uniqueLocations = React.useMemo(() => {
-    if (!jobs) return [];
     const locations = jobs.map(job => `${job.city || ''}, ${job.country || ''}`).filter(loc => loc !== ', ');
     return [...new Set(locations)].sort();
   }, [jobs]);
   
   const filteredJobs = React.useMemo(() => {
-    if (!jobs) return [];
-    
     return jobs.filter(job => {
       const matchesSearch = 
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,7 +53,8 @@ const Jobs = () => {
         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.skills?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = true;
+      const matchesCategory = !selectedCategory || 
+        job.id.toString() === selectedCategory;
       
       const matchesLocation = !selectedLocation || 
         `${job.city || ''}, ${job.country || ''}`.toLowerCase().includes(selectedLocation.toLowerCase());
@@ -198,7 +196,7 @@ const Jobs = () => {
             {filteredJobs.length} {filteredJobs.length === 1 ? 'Job' : 'Jobs'} Found
           </h2>
           <div className="text-sm text-gray-500">
-            Showing {filteredJobs.length} of {jobs?.length || 0} jobs
+            Showing {filteredJobs.length} of {jobs.length} jobs
           </div>
         </div>
         

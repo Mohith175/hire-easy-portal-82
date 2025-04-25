@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ErrorPage from "./pages/ErrorPage";
 
 // Auth Pages
 import Login from "./pages/auth/Login";
@@ -37,6 +39,12 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      onError: (error: any) => {
+        // Check for connection errors to show friendlier messages
+        if (error.isConnectionError) {
+          console.error("Backend connection error detected");
+        }
+      }
     },
   },
 });
@@ -56,6 +64,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetails />} />
+            <Route path="/error" element={<ErrorPage />} />
             
             {/* Job Management */}
             <Route 
@@ -136,7 +145,7 @@ const App = () => (
             />
             
             {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} errorElement={<ErrorPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

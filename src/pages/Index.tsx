@@ -1,9 +1,10 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/common/MainLayout";
-import { ArrowRight, Briefcase, Search, Users, ListCheck } from "lucide-react";
+import { ArrowRight, Briefcase, Search, Users, ListCheck, FileCheck } from "lucide-react";
 
 const Index = () => {
   const { isAuthenticated, user } = useAuth();
@@ -36,12 +37,23 @@ const Index = () => {
             Start your journey with us today.
           </p>
           
-          {isAuthenticated ? <Link to={getDashboardLink()}>
-              <Button size="lg" className="group">
-                Go to Dashboard
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
-              </Button>
-            </Link> : <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+          {isAuthenticated ? (
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to={getDashboardLink()}>
+                <Button size="lg" className="group">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </Button>
+              </Link>
+              <Link to="/applications">
+                <Button size="lg" variant="outline" className="border border-white bg-transparent text-white hover:bg-white hover:text-primary">
+                  <FileCheck className="mr-2 h-5 w-5" />
+                  View Applications
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
               <Link to="/register?role=EMPLOYEE">
                 <Button size="lg" className="w-full sm:w-auto font-mediumw-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:text-blue-600 hover:shadow-lg transition duration-300 font-semibold">
                   I'm Looking for Jobs
@@ -52,7 +64,8 @@ const Index = () => {
                   I'm Hiring Talent
                 </Button>
               </Link>
-            </div>}
+            </div>
+          )}
         </div>
       </div>
 

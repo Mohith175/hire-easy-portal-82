@@ -42,6 +42,8 @@ export interface Resume {
   fileUrl: string;
   uploadedAt: string;
   userId: string;
+  file_name?: string;  // Backend property name
+  uploaded_at?: string; // Backend property name
 }
 
 // Job Categories API
@@ -74,7 +76,7 @@ export const getAllJobs = () => {
   return apiRequest<Job[]>('/jobs');
 };
 
-// This was missing and needed for Jobs.tsx
+// This is needed for Jobs.tsx
 export const getJobs = () => {
   return apiRequest<Job[]>('/jobs');
 };
@@ -87,7 +89,7 @@ export const getEmployerJobs = (employerId: string) => {
   return apiRequest<Job[]>(`/employers/${employerId}/jobs`);
 };
 
-// This was missing and needed for MyJobs.tsx
+// This is needed for MyJobs.tsx
 export const getUserJobs = (userId: string) => {
   return apiRequest<Job[]>(`/employers/${userId}/jobs`);
 };
@@ -157,9 +159,7 @@ export const uploadResume = (userId: string, file: File) => {
   return apiRequest<Resume>(`/employees/${userId}/resumes`, {
     method: 'POST',
     body: formData,
-    headers: {
-      // Remove Content-Type header to let the browser set it with the boundary
-    }
+    headers: {} // Let the browser set the content-type with boundary
   });
 };
 
