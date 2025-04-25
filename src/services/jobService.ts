@@ -17,7 +17,13 @@ export interface Job {
   salary_range?: string;
   employer_id: string;
   created_at: string;
+  experience?: string;
+  skills?: string;
+  city?: string;
+  country?: string;
 }
+
+export type ApplicationStatus = 'pending' | 'reviewing' | 'selected' | 'rejected' | 'shortlisted';
 
 export interface JobApplication {
   id: string;
@@ -30,7 +36,13 @@ export interface JobApplication {
   jobTitle?: string;
 }
 
-export type ApplicationStatus = 'pending' | 'reviewing' | 'selected' | 'rejected';
+export interface Resume {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  uploadedAt: string;
+  userId: string;
+}
 
 // Job Categories API
 export const getJobCategories = () => {
@@ -70,7 +82,7 @@ export const getEmployerJobs = (employerId: string) => {
   return apiRequest<Job[]>(`/employers/${employerId}/jobs`);
 };
 
-export const createJob = (employerId: string, job: Omit<Job, 'id' | 'created_at'>) => {
+export const createJob = (employerId: string, job: Omit<Job, 'id' | 'created_at' | 'employer_id'>) => {
   return apiRequest<Job>(`/employers/${employerId}/jobs`, {
     method: 'POST',
     body: job,
@@ -121,4 +133,22 @@ export const searchJobs = (params: {
   if (params.type) searchParams.append('type', params.type);
   
   return apiRequest<Job[]>(`/jobs/search?${searchParams.toString()}`);
+};
+
+// Resume API
+export const getUserResumes = (userId: string) => {
+  return apiRequest<Resume[]>(`/employees/${userId}/resumes`);
+};
+
+export const uploadResume = (userId: string, formData: FormData) => {
+  return apiRequest<Resume>(`/employees/${userId}/resumes`, {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const deleteResume = (userId: string, resumeId: string) => {
+  return apiRequest(`/employees/${userId}/resumes/${resumeId}`, {
+    method: 'DELETE',
+  });
 };

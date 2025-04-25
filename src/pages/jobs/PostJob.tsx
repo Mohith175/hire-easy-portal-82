@@ -1,239 +1,147 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { createJob, getJobCategories, JobCategory } from "@/services/jobService";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Building, MapPin, BadgeDollarSign, Trophy, Bookmark } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { createJob, getJobCategories } from "@/services/jobService";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Briefcase, Building2, MapPin } from "lucide-react";
 
 const PostJob = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { user } = useAuth();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = React.useState({
     title: "",
-    companyName: "",
-    jobDescription: "",
-    skills: "",
-    jobType: "Full-time",
-    salaryRange: "",
+    company_name: "",
+    description: "",
+    job_type: "Full-time",
+    location: "",
+    salary_range: "",
     experience: "",
-    street: "",
+    skills: "",
     city: "",
-    pinCode: "",
     country: "",
-    jobcategoryId: "0", // This is now a string
   });
   
-  const { data: categories, isLoading: isCategoriesLoading } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ['jobCategories'],
     queryFn: getJobCategories
   });
   
   const createJobMutation = useMutation({
     mutationFn: () => {
-      if (!user) throw new Error("User not authenticated");
-      
-      return createJob({
-        ...formData,
-        employer_id: user.id, // Using employer_id instead of employerId
-        logoPath: ""
-      });
+      if (!user?.id) throw new Error("User not authenticated");
+      return createJob(user.id, formData);
     },
     onSuccess: () => {
       toast({
-        title: "Job posted successfully",
-        description: "Your job has been posted and is now visible to job seekers.",
+        title: "Success",
+        description: "Job posted successfully",
       });
       navigate("/jobs");
     },
     onError: (error) => {
-      console.error("Job posting error:", error);
       toast({
-        title: "Failed to post job",
-        description: "There was an error posting your job. Please try again.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to post job",
         variant: "destructive",
       });
     },
   });
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createJobMutation.mutate();
+  };
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleCategoryChange = (value: string) => {
-    setFormData(prev => ({ ...prev, jobcategoryId: value }));
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
-  const handleJobTypeChange = (value: string) => {
-    setFormData(prev => ({ ...prev, jobType: value }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.title || !formData.companyName || !formData.jobDescription || !formData.jobcategoryId) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    createJobMutation.mutate();
-  };
-  
-  React.useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to post a job.",
-        variant: "destructive",
-      });
-      navigate("/login");
-    }
-  }, [user, navigate]);
   
   if (!user) {
+    navigate("/login");
     return null;
   }
   
   return (
     <MainLayout>
-      <div className="bg-gradient-to-br from-primary to-secondary/70 text-white py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-2">Post a New Job</h1>
-          <p className="text-white/80">
-            Create a job listing to find the perfect candidate for your position
-          </p>
-        </div>
-      </div>
-      
       <div className="container mx-auto px-4 py-8">
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
-            <CardTitle>Job Details</CardTitle>
-            <CardDescription>
-              Fill in the information below to create your job listing
-            </CardDescription>
+            <CardTitle>Post a New Job</CardTitle>
+            <CardDescription>Fill in the job details below</CardDescription>
           </CardHeader>
+          
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Basic Information</h3>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Job Title *</Label>
                     <div className="relative">
                       <Input
+                        required
                         id="title"
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="e.g., Senior Software Engineer"
-                        required
                         className="pl-9"
+                        placeholder="e.g. Senior Frontend Developer"
                       />
-                      <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Company Name *</Label>
+                    <Label htmlFor="company_name">Company Name *</Label>
                     <div className="relative">
                       <Input
-                        id="companyName"
-                        name="companyName"
-                        value={formData.companyName}
-                        onChange={handleChange}
-                        placeholder="e.g., Acme Corporation"
                         required
+                        id="company_name"
+                        name="company_name"
+                        value={formData.company_name}
+                        onChange={handleChange}
                         className="pl-9"
+                        placeholder="e.g. Acme Inc"
                       />
-                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                     </div>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="jobcategoryId">Job Category *</Label>
-                  <Select
-                    value={formData.jobcategoryId}
-                    onValueChange={handleCategoryChange}
-                    required
-                  >
-                    <SelectTrigger className="w-full">
-                      <div className="flex items-center">
-                        <Bookmark size={16} className="mr-2 text-gray-500" />
-                        <SelectValue placeholder="Select a category" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isCategoriesLoading ? (
-                        <SelectItem value="loading">Loading categories...</SelectItem>
-                      ) : categories && categories.length > 0 ? (
-                        categories.map((category: JobCategory) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.title}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="none">No categories available</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="jobDescription">Job Description *</Label>
+                  <Label htmlFor="description">Job Description *</Label>
                   <Textarea
-                    id="jobDescription"
-                    name="jobDescription"
-                    value={formData.jobDescription}
-                    onChange={handleChange}
-                    placeholder="Describe the responsibilities, requirements, and benefits of the position..."
                     required
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Describe the role, responsibilities, and requirements..."
                     rows={6}
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="skills">Required Skills *</Label>
-                  <Input
-                    id="skills"
-                    name="skills"
-                    value={formData.skills}
-                    onChange={handleChange}
-                    placeholder="e.g., React, Node.js, TypeScript, SQL (comma-separated)"
-                    required
-                  />
-                  <p className="text-xs text-gray-500">
-                    Separate skills with commas
-                  </p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Job Details</h3>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="jobType">Job Type *</Label>
+                    <Label htmlFor="job_type">Job Type *</Label>
                     <Select
-                      value={formData.jobType}
-                      onValueChange={handleJobTypeChange}
-                      required
+                      value={formData.job_type}
+                      onValueChange={(value) => handleSelectChange("job_type", value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select job type" />
@@ -244,123 +152,82 @@ const PostJob = () => {
                         <SelectItem value="Contract">Contract</SelectItem>
                         <SelectItem value="Freelance">Freelance</SelectItem>
                         <SelectItem value="Internship">Internship</SelectItem>
-                        <SelectItem value="Remote">Remote</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="experience">Experience Level *</Label>
-                    <div className="relative">
-                      <Input
-                        id="experience"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleChange}
-                        placeholder="e.g., 2-4 years"
-                        required
-                        className="pl-9"
-                      />
-                      <Trophy className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="salaryRange">Salary Range *</Label>
-                  <div className="relative">
+                    <Label htmlFor="salary_range">Salary Range</Label>
                     <Input
-                      id="salaryRange"
-                      name="salaryRange"
-                      value={formData.salaryRange}
+                      id="salary_range"
+                      name="salary_range"
+                      value={formData.salary_range}
                       onChange={handleChange}
-                      placeholder="e.g., $80,000 - $120,000 per year"
-                      required
-                      className="pl-9"
+                      placeholder="e.g. $60,000 - $80,000"
                     />
-                    <BadgeDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
                   </div>
                 </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Location Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country *</Label>
-                    <Input
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      placeholder="e.g., United States"
-                      required
-                    />
-                  </div>
-                  
                   <div className="space-y-2">
                     <Label htmlFor="city">City *</Label>
                     <div className="relative">
                       <Input
+                        required
                         id="city"
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
-                        placeholder="e.g., San Francisco"
-                        required
                         className="pl-9"
+                        placeholder="e.g. New York"
                       />
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                     </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="street">Street Address</Label>
-                    <Input
-                      id="street"
-                      name="street"
-                      value={formData.street}
-                      onChange={handleChange}
-                      placeholder="e.g., 123 Main St"
-                    />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="pinCode">Postal/ZIP Code *</Label>
+                    <Label htmlFor="country">Country *</Label>
                     <Input
-                      id="pinCode"
-                      name="pinCode"
-                      value={formData.pinCode}
-                      onChange={handleChange}
-                      placeholder="e.g., 94105"
                       required
+                      id="country"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      placeholder="e.g. United States"
                     />
                   </div>
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="skills">Required Skills</Label>
+                  <Input
+                    id="skills"
+                    name="skills"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    placeholder="e.g. React, TypeScript, Node.js (comma separated)"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="experience">Experience Level</Label>
+                  <Input
+                    id="experience"
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    placeholder="e.g. 3+ years"
+                  />
+                </div>
               </div>
             </CardContent>
+            
             <CardFooter className="flex justify-between">
               <Button type="button" variant="outline" onClick={() => navigate("/jobs")}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={createJobMutation.isPending}
-              >
-                {createJobMutation.isPending ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Posting Job...
-                  </>
-                ) : (
-                  "Post Job"
-                )}
+              <Button type="submit" disabled={createJobMutation.isPending}>
+                {createJobMutation.isPending ? "Posting..." : "Post Job"}
               </Button>
             </CardFooter>
           </form>
