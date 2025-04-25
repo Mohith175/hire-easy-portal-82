@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -39,7 +40,8 @@ const PostJob = () => {
   const createJobMutation = useMutation({
     mutationFn: () => {
       if (!user?.id) throw new Error("User not authenticated");
-      return createJob(user.id, formData);
+      // Convert user.id to string explicitly
+      return createJob(user.id.toString(), formData);
     },
     onSuccess: () => {
       toast({
