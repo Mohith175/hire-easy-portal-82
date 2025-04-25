@@ -45,7 +45,7 @@ const Index = () => {
                 </Button>
               </Link> : <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                 <Link to="/register?role=EMPLOYEE">
-                  <Button size="lg" className="w-full sm:w-auto font-semibold">
+                  <Button size="lg" className="w-full sm:w-auto font-mediumw-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-white hover:text-blue-600 hover:shadow-lg transition duration-300 font-semibold">
                     I'm Looking for Jobs
                   </Button>
                 </Link>
