@@ -60,23 +60,23 @@ const JobDetails = () => {
               <CardHeader>
                 <div className="space-y-4">
                   <CardTitle className="text-2xl font-bold">
-                    {job.title}
+                    {job?.title}
                   </CardTitle>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                     <div className="flex items-center">
                       <Briefcase className="w-4 h-4 mr-2" />
-                      {job.jobType || job.job_type}
+                      {job?.job_type}
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2" />
-                      {job.location}
+                      {job?.location}
                     </div>
                     <div className="flex items-center">
                       <CalendarDays className="w-4 h-4 mr-2" />
-                      Posted {new Date(job.created_at).toLocaleDateString()}
+                      Posted {job && new Date(job.created_at).toLocaleDateString()}
                     </div>
                   </div>
-                  {job.salary_range && (
+                  {job?.salary_range && (
                     <Badge variant="secondary" className="text-sm">
                       {job.salary_range}
                     </Badge>
@@ -88,14 +88,14 @@ const JobDetails = () => {
                   <h3 className="text-lg font-semibold mb-2">
                     Company
                   </h3>
-                  <p>{job.company_name}</p>
+                  <p>{job?.company_name}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold mb-2">
                     Job Description
                   </h3>
                   <div className="prose max-w-none">
-                    {job.description}
+                    {job?.description}
                   </div>
                 </div>
               </CardContent>
@@ -104,10 +104,12 @@ const JobDetails = () => {
 
           {/* Application Section */}
           <div>
-            <JobApplicationForm 
-              jobId={job.id} 
-              jobTitle={job.title} 
-            />
+            {job && (
+              <JobApplicationForm 
+                jobId={job.id} 
+                jobTitle={job.title} 
+              />
+            )}
           </div>
         </div>
       </div>

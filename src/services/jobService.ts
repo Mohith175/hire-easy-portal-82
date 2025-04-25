@@ -74,12 +74,22 @@ export const getAllJobs = () => {
   return apiRequest<Job[]>('/jobs');
 };
 
+// This was missing and needed for Jobs.tsx
+export const getJobs = () => {
+  return apiRequest<Job[]>('/jobs');
+};
+
 export const getJobById = (id: string) => {
   return apiRequest<Job>(`/jobs/${id}`);
 };
 
 export const getEmployerJobs = (employerId: string) => {
   return apiRequest<Job[]>(`/employers/${employerId}/jobs`);
+};
+
+// This was missing and needed for MyJobs.tsx
+export const getUserJobs = (userId: string) => {
+  return apiRequest<Job[]>(`/employers/${userId}/jobs`);
 };
 
 export const createJob = (employerId: string, job: Omit<Job, 'id' | 'created_at' | 'employer_id'>) => {
@@ -140,10 +150,16 @@ export const getUserResumes = (userId: string) => {
   return apiRequest<Resume[]>(`/employees/${userId}/resumes`);
 };
 
-export const uploadResume = (userId: string, formData: FormData) => {
+export const uploadResume = (userId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
   return apiRequest<Resume>(`/employees/${userId}/resumes`, {
     method: 'POST',
     body: formData,
+    headers: {
+      // Remove Content-Type header to let the browser set it with the boundary
+    }
   });
 };
 

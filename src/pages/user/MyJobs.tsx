@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { Link } from 'react-router-dom';
@@ -45,7 +46,7 @@ const MyJobs = () => {
                   <Link key={job.id} to={`/jobs/${job.id}`} className="block">
                     <div className="border rounded-md p-4 hover:shadow-md transition-shadow duration-300">
                       <h3 className="text-lg font-semibold mb-2">{job.title}</h3>
-                      <div className="text-sm text-gray-600 mb-2">{job.companyName || job.company_name}</div>
+                      <div className="text-sm text-gray-600 mb-2">{job.company_name}</div>
                       <div className="flex flex-wrap items-center text-sm text-gray-500 gap-y-1">
                         <span className="flex items-center mr-4">
                           <MapPin size={14} className="mr-1" />
@@ -53,11 +54,11 @@ const MyJobs = () => {
                         </span>
                         <span className="flex items-center mr-4">
                           <Briefcase size={14} className="mr-1" />
-                          {job.jobType || job.job_type}
+                          {job.job_type}
                         </span>
                         <span className="flex items-center mr-4">
                           <DollarSign size={14} className="mr-1" />
-                          {job.salaryRange || job.salary_range}
+                          {job.salary_range}
                         </span>
                         <span className="flex items-center">
                           <CalendarDays size={14} className="mr-1" />

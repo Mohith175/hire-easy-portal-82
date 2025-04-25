@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,8 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onSelect, selectedResumeId 
   
   const deleteMutation = useMutation({
     mutationFn: (resumeId: string) => {
-      return deleteResume(resumeId);
+      if (!user) throw new Error("User not authenticated");
+      return deleteResume(user.id.toString(), resumeId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userResumes', user?.id?.toString()] });

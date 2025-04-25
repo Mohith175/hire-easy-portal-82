@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { Job, JobCategory, getJobs, getJobCategories, searchJobs } from "@/services/jobService";
+import { Job, JobCategory, getAllJobs, getJobCategories } from "@/services/jobService";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search,
@@ -30,19 +30,19 @@ const Jobs = () => {
   const [selectedJobType, setSelectedJobType] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
   
-  const { data: jobs, isLoading, error, refetch } = useQuery({
+  const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['jobs'],
-    queryFn: getJobs
+    queryFn: getAllJobs
   });
   
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ['jobCategories'],
     queryFn: getJobCategories
   });
   
   const uniqueLocations = React.useMemo(() => {
     if (!jobs) return [];
-    const locations = jobs.map(job => `${job.city}, ${job.country}`);
+    const locations = jobs.map(job => `${job.city || ''}, ${job.country || ''}`).filter(loc => loc !== ', ');
     return [...new Set(locations)].sort();
   }, [jobs]);
   
@@ -52,16 +52,16 @@ const Jobs = () => {
     return jobs.filter(job => {
       const matchesSearch = 
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.jobDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.skills?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = !selectedCategory || job.jobcategoryId === selectedCategory;
+      const matchesCategory = true;
       
       const matchesLocation = !selectedLocation || 
-        `${job.city}, ${job.country}`.toLowerCase().includes(selectedLocation.toLowerCase());
+        `${job.city || ''}, ${job.country || ''}`.toLowerCase().includes(selectedLocation.toLowerCase());
       
-      const matchesJobType = !selectedJobType || job.jobType.toLowerCase() === selectedJobType.toLowerCase();
+      const matchesJobType = !selectedJobType || job.job_type.toLowerCase() === selectedJobType.toLowerCase();
       
       return matchesSearch && matchesCategory && matchesLocation && matchesJobType;
     });
@@ -254,7 +254,7 @@ interface JobCardProps {
 }
 
 const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
-  const categoryName = categories.find(c => c.id === job.jobcategoryId)?.title || "Unknown Category";
+  const categoryName = "Category";
   
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
@@ -268,12 +268,12 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
                 </h3>
                 <div className="flex items-center text-gray-600 mt-1">
                   <Building size={16} className="mr-2" />
-                  <span>{job.companyName}</span>
+                  <span>{job.company_name}</span>
                 </div>
               </div>
               <div className="mt-2 md:mt-0">
                 <Badge className="bg-primary-100 text-primary border-primary">
-                  {job.jobType}
+                  {job.job_type}
                 </Badge>
               </div>
             </div>
@@ -281,26 +281,26 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="flex items-center text-gray-600">
                 <MapPin size={16} className="mr-2 text-gray-500" />
-                <span>{job.city}, {job.country}</span>
+                <span>{job.city || ''}, {job.country || ''}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <CreditCard size={16} className="mr-2 text-gray-500" />
-                <span>{job.salaryRange}</span>
+                <span>{job.salary_range || 'Not specified'}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Award size={16} className="mr-2 text-gray-500" />
-                <span>{job.experience}</span>
+                <span>{job.experience || 'Not specified'}</span>
               </div>
             </div>
             
-            <p className="text-gray-700 mb-4 line-clamp-2">{job.jobDescription}</p>
+            <p className="text-gray-700 mb-4 line-clamp-2">{job.description}</p>
             
             <div className="flex flex-wrap gap-2">
-              {job.skills.split(',').map((skill, index) => (
+              {job.skills?.split(',').map((skill, index) => (
                 <Badge key={index} variant="outline" className="bg-gray-100">
                   {skill.trim()}
                 </Badge>
-              ))}
+              )) || <span className="text-gray-500">No skills listed</span>}
             </div>
           </div>
         </div>
@@ -308,7 +308,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
       <CardFooter className="bg-gray-50 flex justify-between items-center">
         <div className="text-sm text-gray-500 flex items-center">
           <Calendar size={16} className="mr-2" />
-          <span>Posted recently</span>
+          <span>Posted {new Date(job.created_at).toLocaleDateString()}</span>
         </div>
         <Link to={`/jobs/${job.id}`}>
           <Button variant="outline">View Details</Button>
