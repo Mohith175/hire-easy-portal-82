@@ -1,6 +1,4 @@
 
-import { toast } from "@/components/ui/use-toast";
-
 // API base URL - Replace with your actual Spring Boot backend URL
 const API_URL = "http://localhost:8080/api";
 
@@ -46,25 +44,8 @@ export const apiRequest = async <T>(endpoint: string, options: ApiOptions = {}):
     
     const response = await fetch(`${API_URL}${endpoint}`, requestOptions);
     
-    // Check if the response is ok (status in the range 200-299)
     if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        errorData = { message: 'An unknown error occurred' };
-      }
-      
-      // Handle unauthorized specifically - could trigger a logout
-      if (response.status === 401) {
-        toast({
-          title: "Authentication Error",
-          description: "Your session has expired. Please login again.",
-          variant: "destructive",
-        });
-        // Could add auto-logout logic here
-      }
-      
+      const errorData = await response.json();
       throw new Error(errorData.message || `API error: ${response.statusText}`);
     }
     
@@ -76,11 +57,21 @@ export const apiRequest = async <T>(endpoint: string, options: ApiOptions = {}):
     return await response.json();
   } catch (error: any) {
     console.error('API request failed:', error);
-    toast({
-      title: "Error",
-      description: error.message || 'An unexpected error occurred',
-      variant: "destructive",
-    });
     throw error;
   }
+};
+
+// Authentication API functions
+export const login = async (email: string, password: string) => {
+  return apiRequest('/auth/login', {
+    method: 'POST',
+    body: { email, password }
+  });
+};
+
+export const register = async (userData: any) => {
+  return apiRequest('/auth/signin', {
+    method: 'POST',
+    body: userData
+  });
 };

@@ -2,7 +2,7 @@
 import { apiRequest } from './api';
 
 export interface Employer {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -15,7 +15,7 @@ export interface Employer {
 }
 
 export interface Employee {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -29,47 +29,43 @@ export interface Employee {
 }
 
 export interface EmployeeProfile {
-  id: number;
+  id: string;
   photoPath: string;
   github: string;
   linkedin: string;
   bio: string;
   website: string;
   resumePath: string;
-  employeeId: number;
+  employeeId: string;
 }
 
 export interface Skill {
-  id: number;
+  id: string;
   name: string;
   experience: number;
-  employeeId: number;
+  employeeId: string;
 }
 
 export interface WorkExperience {
-  id: number;
+  id: string;
   company: string;
   position: string;
   startDate: string;
   endDate: string;
-  employeeId: number;
+  employeeId: string;
 }
 
 export interface Qualification {
-  id: number;
+  id: string;
   degree: string;
   startDate: string;
   endDate: string;
-  employeeId: number;
+  employeeId: string;
 }
 
 // Employer Services
 export const getEmployers = () => {
   return apiRequest<Employer[]>('/employers');
-};
-
-export const getEmployer = (id: number) => {
-  return apiRequest<Employer>(`/employers/${id}`);
 };
 
 export const createEmployer = (employer: Omit<Employer, 'id'>) => {
@@ -84,7 +80,7 @@ export const getEmployees = () => {
   return apiRequest<Employee[]>('/employees');
 };
 
-export const getEmployee = (id: number) => {
+export const getEmployee = (id: string) => {
   return apiRequest<Employee>(`/employees/${id}`);
 };
 
@@ -96,7 +92,7 @@ export const createEmployee = (employee: Omit<Employee, 'id'>) => {
 };
 
 // Employee Profile Services
-export const updateEmployeeProfile = (employeeId: number, profileData: Partial<EmployeeProfile>) => {
+export const updateEmployeeProfile = (employeeId: string, profileData: Partial<EmployeeProfile>) => {
   return apiRequest<EmployeeProfile>(`/employees/${employeeId}/profileDetails`, {
     method: 'POST',
     body: profileData,
@@ -104,7 +100,7 @@ export const updateEmployeeProfile = (employeeId: number, profileData: Partial<E
 };
 
 // Employee Skills Services
-export const updateEmployeeSkills = (employeeId: number, skills: Partial<Skill>[]) => {
+export const updateEmployeeSkills = (employeeId: string, skills: Partial<Skill>[]) => {
   return apiRequest<Skill[]>(`/employees/${employeeId}/skills`, {
     method: 'POST',
     body: skills,
@@ -112,7 +108,7 @@ export const updateEmployeeSkills = (employeeId: number, skills: Partial<Skill>[
 };
 
 // Employee Qualifications Services
-export const updateEmployeeQualifications = (employeeId: number, qualifications: Partial<Qualification>[]) => {
+export const updateEmployeeQualifications = (employeeId: string, qualifications: Partial<Qualification>[]) => {
   return apiRequest<Qualification[]>(`/employees/${employeeId}/qualifications`, {
     method: 'POST',
     body: qualifications,
@@ -120,7 +116,7 @@ export const updateEmployeeQualifications = (employeeId: number, qualifications:
 };
 
 // Employee Work Experience Services
-export const updateEmployeeWorkExperiences = (employeeId: number, experiences: Partial<WorkExperience>[]) => {
+export const updateEmployeeWorkExperiences = (employeeId: string, experiences: Partial<WorkExperience>[]) => {
   return apiRequest<WorkExperience[]>(`/employees/${employeeId}/workExperiences`, {
     method: 'POST',
     body: experiences,
