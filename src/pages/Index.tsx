@@ -1,18 +1,18 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/common/MainLayout";
 import { ArrowRight, Briefcase, Search, Users } from "lucide-react";
-
 const Index = () => {
-  const { isAuthenticated, user } = useAuth();
+  const {
+    isAuthenticated,
+    user
+  } = useAuth();
 
   // Function to redirect to the appropriate dashboard based on user role
   const getDashboardLink = () => {
     if (!user) return "/login";
-    
     switch (user.role) {
       case "ADMIN":
         return "/admin/dashboard";
@@ -24,9 +24,7 @@ const Index = () => {
         return "/";
     }
   };
-
-  return (
-    <MainLayout>
+  return <MainLayout>
       {/* Hero section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary to-secondary/70 text-white">
         <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-10 bg-center bg-cover"></div>
@@ -40,27 +38,23 @@ const Index = () => {
               Start your journey with us today.
             </p>
             
-            {isAuthenticated ? (
-              <Link to={getDashboardLink()}>
+            {isAuthenticated ? <Link to={getDashboardLink()}>
                 <Button size="lg" className="group">
                   Go to Dashboard
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
                 </Button>
-              </Link>
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+              </Link> : <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                 <Link to="/register?role=EMPLOYEE">
                   <Button size="lg" className="w-full sm:w-auto">
                     I'm Looking for Jobs
                   </Button>
                 </Link>
                 <Link to="/register?role=EMPLOYER">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-white hover:bg-white text-blue-700">
                     I'm Hiring Talent
                   </Button>
                 </Link>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
 
@@ -124,8 +118,7 @@ const Index = () => {
             we have the tools to help you succeed.
           </p>
           
-          {!isAuthenticated && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {!isAuthenticated && <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/login">
                 <Button size="lg" className="w-full sm:w-auto">
                   Sign In
@@ -136,12 +129,9 @@ const Index = () => {
                   Create an Account
                 </Button>
               </Link>
-            </div>
-          )}
+            </div>}
         </div>
       </section>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default Index;
