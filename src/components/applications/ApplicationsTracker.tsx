@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,7 +25,7 @@ import {
 const ApplicationsTracker: React.FC = () => {
   const { user } = useAuth();
   
-  const { data: applications } = useQuery({
+  const { data: applications, isLoading, error } = useQuery({
     queryKey: ['userApplications', user?.id?.toString()],
     queryFn: () => user ? getUserApplications(user.id.toString()) : Promise.resolve([]),
     enabled: !!user,

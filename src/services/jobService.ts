@@ -226,7 +226,7 @@ export const getJobApplications = async (jobId: string) => {
   
   return data.map(app => ({
     ...app,
-    userName: app.users?.email || 'Anonymous User',
+    userName: app.users?.id || 'Anonymous User', // Using id instead of email since email may not exist
     appliedDate: app.created_at,
     status: (app.status || 'pending') as ApplicationStatus
   }));

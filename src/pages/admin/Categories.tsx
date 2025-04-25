@@ -49,7 +49,7 @@ const Categories = () => {
   });
   
   const [editedCategory, setEditedCategory] = useState({
-    id: 0,
+    id: "",
     title: "",
     description: "",
   });
@@ -85,7 +85,7 @@ const Categories = () => {
   
   // Update category mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, category }: { id: number, category: Partial<JobCategory> }) => 
+    mutationFn: ({ id, category }: { id: string, category: Partial<JobCategory> }) => 
       updateJobCategory(id, category),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobCategories'] });
@@ -106,7 +106,7 @@ const Categories = () => {
   
   // Delete category mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteJobCategory(id),
+    mutationFn: (id: string) => deleteJobCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobCategories'] });
       toast({

@@ -30,7 +30,7 @@ const PostJob = () => {
     city: "",
     pinCode: "",
     country: "",
-    jobcategoryId: "0", // Ensure this is a string
+    jobcategoryId: "0", // This is now a string
   });
   
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({

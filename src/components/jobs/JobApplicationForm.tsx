@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,9 @@ interface JobApplicationFormProps {
 
 const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle, onSuccess }) => {
   const { user } = useAuth();
+  const [selectedResumeId, setSelectedResumeId] = useState<string | undefined>(undefined);
+  const [coverLetter, setCoverLetter] = useState<string>("");
+  const [showResumeUpload, setShowResumeUpload] = useState<boolean>(false);
   
   const { data: resumes } = useQuery({
     queryKey: ['userResumes', user?.id?.toString()],
