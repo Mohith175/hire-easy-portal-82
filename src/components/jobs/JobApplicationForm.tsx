@@ -18,13 +18,10 @@ interface JobApplicationFormProps {
 
 const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle, onSuccess }) => {
   const { user } = useAuth();
-  const [coverLetter, setCoverLetter] = useState("");
-  const [selectedResumeId, setSelectedResumeId] = useState<string | undefined>();
-  const [showResumeUpload, setShowResumeUpload] = useState(false);
-
+  
   const { data: resumes } = useQuery({
-    queryKey: ['userResumes', user?.id],
-    queryFn: () => user ? getUserResumes(user.id) : Promise.resolve([]),
+    queryKey: ['userResumes', user?.id?.toString()],
+    queryFn: () => user ? getUserResumes(user.id.toString()) : Promise.resolve([]),
     enabled: !!user,
   });
 
@@ -33,7 +30,7 @@ const JobApplicationForm: React.FC<JobApplicationFormProps> = ({ jobId, jobTitle
       if (!user) throw new Error("User not authenticated");
       if (!selectedResumeId) throw new Error("Please select a resume");
       
-      return applyForJob(user.id, jobId, selectedResumeId);
+      return applyForJob(user.id.toString(), jobId, selectedResumeId);
     },
     onSuccess: () => {
       toast({

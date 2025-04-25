@@ -20,21 +20,19 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onSelect, selectedResumeId 
   
   const queryClient = useQueryClient();
   
-  // Fetch user's resumes
   const { data: resumes, isLoading } = useQuery({
-    queryKey: ['userResumes', user?.id],
-    queryFn: () => user ? getUserResumes(user.id) : Promise.resolve([]),
+    queryKey: ['userResumes', user?.id?.toString()],
+    queryFn: () => user ? getUserResumes(user.id.toString()) : Promise.resolve([]),
     enabled: !!user,
   });
   
-  // Upload resume mutation
   const uploadMutation = useMutation({
     mutationFn: async () => {
       if (!user || !file) return null;
-      return uploadResume(user.id, file);
+      return uploadResume(user.id.toString(), file);
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['userResumes', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['userResumes', user?.id?.toString()] });
       if (data) {
         onSelect(data.id);
         toast({
@@ -54,13 +52,12 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onSelect, selectedResumeId 
     }
   });
   
-  // Delete resume mutation
   const deleteMutation = useMutation({
     mutationFn: (resumeId: string) => {
       return deleteResume(resumeId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userResumes', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['userResumes', user?.id?.toString()] });
       if (selectedResumeId) {
         onSelect(undefined);
       }

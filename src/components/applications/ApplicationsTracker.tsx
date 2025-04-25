@@ -21,18 +21,17 @@ import {
   X
 } from "lucide-react";
 
-const ApplicationsTracker = () => {
+const ApplicationsTracker: React.FC = () => {
   const { user } = useAuth();
-  const [selectedTab, setSelectedTab] = React.useState("all");
   
-  // Fetch user's applications
-  const { data: applications, isLoading, error } = useQuery({
-    queryKey: ['userApplications', user?.id],
-    queryFn: () => user ? getUserApplications(user.id) : Promise.resolve([]),
+  const { data: applications } = useQuery({
+    queryKey: ['userApplications', user?.id?.toString()],
+    queryFn: () => user ? getUserApplications(user.id.toString()) : Promise.resolve([]),
     enabled: !!user,
   });
+
+  const [selectedTab, setSelectedTab] = React.useState("all");
   
-  // Filter applications based on selected tab
   const filteredApplications = React.useMemo(() => {
     if (!applications) return [];
     
@@ -43,7 +42,6 @@ const ApplicationsTracker = () => {
     return applications.filter(app => app.status.toLowerCase() === selectedTab);
   }, [applications, selectedTab]);
   
-  // Get count of applications by status
   const getStatusCount = (status: string): number => {
     if (!applications) return 0;
     return applications.filter(app => 
