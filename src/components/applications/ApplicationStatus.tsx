@@ -77,9 +77,6 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ status, showProgr
               "h-1.5", 
               status === "rejected" ? "bg-red-100" : "bg-blue-100"
             )}
-            indicator={cn(
-              status === "rejected" ? "bg-red-500" : undefined
-            )}
           />
         </div>
       )}
