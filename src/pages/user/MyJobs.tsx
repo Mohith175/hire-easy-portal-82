@@ -46,7 +46,7 @@ const MyJobs = () => {
                   <Link key={job.id} to={`/jobs/${job.id}`} className="block">
                     <div className="border rounded-md p-4 hover:shadow-md transition-shadow duration-300">
                       <h3 className="text-lg font-semibold mb-2">{job.title}</h3>
-                      <div className="text-sm text-gray-600 mb-2">{job.company_name}</div>
+                      <div className="text-sm text-gray-600 mb-2">{job.companyName}</div>
                       <div className="flex flex-wrap items-center text-sm text-gray-500 gap-y-1">
                         <span className="flex items-center mr-4">
                           <MapPin size={14} className="mr-1" />
@@ -54,15 +54,15 @@ const MyJobs = () => {
                         </span>
                         <span className="flex items-center mr-4">
                           <Briefcase size={14} className="mr-1" />
-                          {job.job_type}
+                          {job.jobType}
                         </span>
                         <span className="flex items-center mr-4">
                           <DollarSign size={14} className="mr-1" />
-                          {job.salary_range}
+                          {job.salaryRange}
                         </span>
                         <span className="flex items-center">
                           <CalendarDays size={14} className="mr-1" />
-                          Posted {new Date(job.created_at).toLocaleDateString()}
+                          Posted {new Date(job.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>

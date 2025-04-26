@@ -21,6 +21,7 @@ export interface Job {
   location: string;
   salary: string;
   company: string;
+  companyName: string;
   companyDescription?: string;
   postedDate: string;
   deadline: string;
@@ -30,6 +31,12 @@ export interface Job {
   employerId: string;
   categoryName?: string;
   applicationsCount?: number;
+  salaryRange?: string;
+  createdAt: string;
+  city?: string;
+  country?: string;
+  skills?: string;
+  experience?: string;
 }
 
 export interface JobApplication {
@@ -41,15 +48,14 @@ export interface JobApplication {
   appliedDate: string;
   feedback?: string;
   jobTitle?: string;
+  employeeId_FK?: string;
 }
 
 export interface Resume {
   id: string;
   employeeId: string;
-  file_name?: string;
   fileName?: string;
-  uploaded_at: string;
-  file_url?: string;
+  uploadedAt: string;
   fileUrl?: string;
 }
 
@@ -108,10 +114,8 @@ export async function deleteJobCategory(id: string): Promise<void> {
 }
 
 // Jobs APIs
-export async function getJobs(params?: Record<string, string>): Promise<Job[]> {
-  const queryParams = params ? new URLSearchParams(params).toString() : '';
-  const endpoint = queryParams ? `/jobs?${queryParams}` : '/jobs';
-  return apiRequest<Job[]>(endpoint);
+export async function getJobs(): Promise<Job[]> {
+  return apiRequest<Job[]>('/jobs');
 }
 
 export async function getJobById(id: string): Promise<Job> {
@@ -142,6 +146,11 @@ export async function deleteJob(employerId: string, jobId: string): Promise<void
 
 export async function getEmployerJobs(employerId: string): Promise<Job[]> {
   return apiRequest<Job[]>(`/employers/${employerId}/jobs`);
+}
+
+// For MyJobs page
+export async function getUserJobs(userId: string): Promise<Job[]> {
+  return apiRequest<Job[]>(`/employers/${userId}/jobs`);
 }
 
 // Job Applications APIs

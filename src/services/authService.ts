@@ -18,6 +18,12 @@ export interface RegisterData {
   email: string;
   password: string;
   role: string;
+  contactNum?: string;
+  country?: string;
+  city?: string;
+  pincode?: string;
+  state?: string;
+  street?: string;
 }
 
 /**

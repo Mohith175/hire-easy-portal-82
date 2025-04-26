@@ -39,6 +39,7 @@ const RegisterFormSchema = z.object({
   pincode: z.string().min(5, "Pincode must be at least 5 characters"),
   state: z.string().min(2, "State must be at least 2 characters"),
   street: z.string().min(2, "Street must be at least 2 characters"),
+  role: z.string().default("EMPLOYEE") // Default role
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -68,6 +69,7 @@ const Register = () => {
       pincode: "",
       state: "",
       street: "",
+      role: "EMPLOYEE", // Default role
     },
   });
   

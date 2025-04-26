@@ -65,7 +65,7 @@ const JobDetails = () => {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                     <div className="flex items-center">
                       <Briefcase className="w-4 h-4 mr-2" />
-                      {job?.job_type}
+                      {job?.jobType}
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2" />
@@ -73,12 +73,12 @@ const JobDetails = () => {
                     </div>
                     <div className="flex items-center">
                       <CalendarDays className="w-4 h-4 mr-2" />
-                      Posted {job && new Date(job.created_at).toLocaleDateString()}
+                      Posted {job && new Date(job.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  {job?.salary_range && (
+                  {job?.salaryRange && (
                     <Badge variant="secondary" className="text-sm">
-                      {job.salary_range}
+                      {job.salaryRange}
                     </Badge>
                   )}
                 </div>
@@ -88,7 +88,7 @@ const JobDetails = () => {
                   <h3 className="text-lg font-semibold mb-2">
                     Company
                   </h3>
-                  <p>{job?.company_name}</p>
+                  <p>{job?.companyName}</p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold mb-2">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/common/MainLayout";
@@ -32,7 +33,7 @@ const Jobs = () => {
   
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['jobs'],
-    queryFn: getJobs
+    queryFn: () => getJobs()
   });
   
   const { data: categories = [] } = useQuery({
@@ -49,7 +50,7 @@ const Jobs = () => {
     return jobs.filter(job => {
       const matchesSearch = 
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.skills?.toLowerCase().includes(searchTerm.toLowerCase());
       
@@ -59,7 +60,7 @@ const Jobs = () => {
       const matchesLocation = !selectedLocation || 
         `${job.city || ''}, ${job.country || ''}`.toLowerCase().includes(selectedLocation.toLowerCase());
       
-      const matchesJobType = !selectedJobType || job.job_type.toLowerCase() === selectedJobType.toLowerCase();
+      const matchesJobType = !selectedJobType || job.jobType.toLowerCase() === selectedJobType.toLowerCase();
       
       return matchesSearch && matchesCategory && matchesLocation && matchesJobType;
     });
@@ -266,12 +267,12 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
                 </h3>
                 <div className="flex items-center text-gray-600 mt-1">
                   <Building size={16} className="mr-2" />
-                  <span>{job.company_name}</span>
+                  <span>{job.companyName}</span>
                 </div>
               </div>
               <div className="mt-2 md:mt-0">
                 <Badge className="bg-primary-100 text-primary border-primary">
-                  {job.job_type}
+                  {job.jobType}
                 </Badge>
               </div>
             </div>
@@ -283,7 +284,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
               </div>
               <div className="flex items-center text-gray-600">
                 <CreditCard size={16} className="mr-2 text-gray-500" />
-                <span>{job.salary_range || 'Not specified'}</span>
+                <span>{job.salaryRange || 'Not specified'}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Award size={16} className="mr-2 text-gray-500" />
@@ -306,7 +307,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, categories }) => {
       <CardFooter className="bg-gray-50 flex justify-between items-center">
         <div className="text-sm text-gray-500 flex items-center">
           <Calendar size={16} className="mr-2" />
-          <span>Posted {new Date(job.created_at).toLocaleDateString()}</span>
+          <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
         </div>
         <Link to={`/jobs/${job.id}`}>
           <Button variant="outline">View Details</Button>
