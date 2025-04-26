@@ -1,8 +1,6 @@
 
 import { apiRequest } from './api';
-import { AuthUser } from '@/contexts/AuthContext';
 
-// Types for API responses
 export interface LoginResponse {
   userId: string;
   firstName: string;

@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { login, register, RegisterData } from "@/services/authService";
+import { login, register, RegisterData, LoginResponse } from "@/services/authService";
 
 export interface AuthUser {
   id: number;
