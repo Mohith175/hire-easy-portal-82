@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "@/components/ui/use-toast";
+import { apiRequest } from "@/services/api";
 
 export interface AuthUser {
   id: number;
@@ -11,6 +13,15 @@ export interface AuthUser {
 }
 
 export type UserRole = "ADMIN" | "EMPLOYER" | "EMPLOYEE" | "*";
+
+interface LoginResponse {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  token: string;
+  role: UserRole;
+}
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -51,24 +62,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call - in a real app, this would be an actual API request
-      // For demo purposes, we're creating a mock user
-      const mockUser: AuthUser = {
-        id: 1,
-        firstName: "John",
-        lastName: "Doe",
-        email: email,
-        token: "mock-jwt-token",
-        role: email.includes("admin") ? "ADMIN" : 
-              email.includes("employer") ? "EMPLOYER" : 
-              "EMPLOYEE"
+      // Make API call to Spring Boot backend
+      const response = await apiRequest<LoginResponse>('/auth/login', {
+        method: 'POST',
+        body: { email, password }
+      });
+      
+      // Create user object from response
+      const loggedInUser: AuthUser = {
+        id: parseInt(response.userId),
+        firstName: response.firstName,
+        lastName: response.lastName,
+        email: response.email,
+        token: response.token,
+        role: response.role
       };
       
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      setUser(loggedInUser);
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${loggedInUser.firstName}!`,
+      });
+      
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+      
       return false;
     }
   };
@@ -76,25 +103,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
   };
 
   const register = async (userData: Partial<AuthUser>): Promise<boolean> => {
     try {
-      // Simulate API call - in a real app, this would be an actual API request
-      const mockUser: AuthUser = {
-        id: Math.floor(Math.random() * 1000) + 1,
-        firstName: userData.firstName || "New",
-        lastName: userData.lastName || "User",
-        email: userData.email || "user@example.com",
-        token: "mock-jwt-token",
-        role: userData.role || "EMPLOYEE"
-      };
+      // Make API call to Spring Boot backend
+      await apiRequest('/auth/signin', {
+        method: 'POST',
+        body: userData
+      });
       
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created. Please log in.",
+      });
+      
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration failed:", error);
+      
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please check your information and try again.",
+        variant: "destructive",
+      });
+      
       return false;
     }
   };

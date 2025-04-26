@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +22,9 @@ import PostJob from "./pages/jobs/PostJob";
 import Profile from "./pages/user/Profile";
 import MyApplications from "./pages/user/MyApplications";
 import MyJobs from "./pages/user/MyJobs";
+
+// Employer Pages
+import EmployerApplications from "./pages/employer/Applications";
 
 // Admin Management Pages (we keep these for now)
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -100,6 +102,16 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["*"]}>
                   <MyJobs />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Employer Routes */}
+            <Route 
+              path="/employer/applications" 
+              element={
+                <ProtectedRoute allowedRoles={["EMPLOYER"]}>
+                  <EmployerApplications />
                 </ProtectedRoute>
               } 
             />
