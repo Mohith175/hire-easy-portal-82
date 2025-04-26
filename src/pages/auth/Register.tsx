@@ -77,8 +77,23 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Remove confirmPassword before sending to API
-      const { confirmPassword, ...formData } = values;
+      // Remove confirmPassword before sending to API and ensure all required fields have values
+      const { confirmPassword, ...formDataWithOptionals } = values;
+      
+      // Make sure all required fields are provided with non-empty values
+      const formData = {
+        firstName: formDataWithOptionals.firstName || "User", // Fallback
+        lastName: formDataWithOptionals.lastName || "Name", // Fallback
+        email: formDataWithOptionals.email,
+        password: formDataWithOptionals.password,
+        role: formDataWithOptionals.role || "EMPLOYEE", // Ensure role is specified
+        contactNum: formDataWithOptionals.contactNum || "",
+        country: formDataWithOptionals.country || "",
+        city: formDataWithOptionals.city || "",
+        pincode: formDataWithOptionals.pincode || "",
+        state: formDataWithOptionals.state || "",
+        street: formDataWithOptionals.street || ""
+      };
       
       await registerUser(formData);
       

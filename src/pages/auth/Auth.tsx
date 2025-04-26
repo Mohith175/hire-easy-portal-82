@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { signInWithEmail, signUpWithEmail } from "@/services/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,6 +14,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login, register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,13 +22,21 @@ export default function Auth() {
 
     try {
       if (isSignUp) {
-        await signUpWithEmail(email, password);
+        // Simple registration with minimal required fields
+        await register({
+          firstName: email.split('@')[0], // Default value
+          lastName: "",
+          email,
+          password,
+          role: "EMPLOYEE" // Default role
+        });
+        
         toast({
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
       } else {
-        await signInWithEmail(email, password);
+        await login(email, password);
         toast({
           title: "Welcome back!",
           description: "You have successfully signed in.",
