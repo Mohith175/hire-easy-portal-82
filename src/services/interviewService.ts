@@ -29,3 +29,13 @@ export const updateInterviewStatus = (employerId: string, interviewId: string, s
     body: { status }
   });
 };
+
+export const rejectApplication = (employerId: string, applicationId: string, feedback?: string) => {
+  return apiRequest(`/employers/${employerId}/myApplications/${applicationId}`, {
+    method: 'POST',
+    body: { 
+      status: 'rejected',
+      feedback
+    }
+  });
+};

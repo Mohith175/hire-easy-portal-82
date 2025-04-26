@@ -74,6 +74,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ status, showProgr
           <Progress
             value={getProgressValue()}
             className={`h-1.5 ${status === "rejected" ? "bg-red-100" : "bg-blue-100"}`}
+            indicatorClassName={status === "rejected" ? "bg-red-500" : undefined}
           />
         </div>
       )}

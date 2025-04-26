@@ -19,7 +19,8 @@ import {
   Building, 
   Calendar,
   Briefcase,
-  X
+  X,
+  AlertTriangle
 } from "lucide-react";
 
 const ApplicationsTracker: React.FC = () => {
@@ -137,7 +138,11 @@ interface ApplicationItemProps {
 
 const ApplicationItem: React.FC<ApplicationItemProps> = ({ application }) => {
   return (
-    <div className="p-4 border rounded-lg hover:border-primary transition-colors">
+    <div className={`p-4 border rounded-lg transition-colors ${
+      application.status === 'rejected' 
+        ? 'bg-red-50 hover:border-red-300' 
+        : 'hover:border-primary'
+    }`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex-grow space-y-1">
           <h3 className="font-medium text-lg">
@@ -162,9 +167,20 @@ const ApplicationItem: React.FC<ApplicationItemProps> = ({ application }) => {
       </div>
       
       {application.feedback && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-md">
-          <p className="text-sm font-medium mb-1">Feedback:</p>
-          <p className="text-sm text-gray-600">{application.feedback}</p>
+        <div className={`mt-4 p-3 rounded-md ${
+          application.status === 'rejected' 
+            ? 'bg-red-100' 
+            : 'bg-gray-50'
+        }`}>
+          <div className="flex items-start">
+            {application.status === 'rejected' ? (
+              <AlertTriangle className="text-red-500 mr-2 mt-0.5" size={16} />
+            ) : null}
+            <div>
+              <p className="text-sm font-medium mb-1">Feedback:</p>
+              <p className="text-sm text-gray-600">{application.feedback}</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,10 +1,11 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { getEmployerApplications, JobApplication } from "@/services/jobService";
 import { getEmployerJobs, Job } from "@/services/jobService";
-import { scheduleInterview } from "@/services/interviewService";
+import { scheduleInterview, rejectApplication } from "@/services/interviewService";
 import DashboardLayout from "@/components/common/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import ApplicationStatus from "@/components/applications/ApplicationStatus";
 import { handleError } from "@/services/errorService";
@@ -30,6 +32,8 @@ const EmployerApplications = () => {
   const [interviewDate, setInterviewDate] = useState<string>("");
   const [interviewTime, setInterviewTime] = useState<string>("12:00");
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
+  const [feedback, setFeedback] = useState<string>("");
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 
   // Fetch all jobs posted by the employer
   const { data: jobs } = useQuery({
@@ -76,6 +80,38 @@ const EmployerApplications = () => {
       setSelectedApplication(null);
       setInterviewDate("");
       setInterviewTime("12:00");
+      
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  // Handle rejecting an application
+  const handleRejectApplication = async () => {
+    if (!userId || !selectedApplication) {
+      toast({
+        title: "Error",
+        description: "Cannot process the rejection",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await rejectApplication(userId, selectedApplication.id, feedback);
+      
+      toast({
+        title: "Application rejected",
+        description: "The candidate will be notified of your decision",
+      });
+      
+      // Refresh applications list
+      refetch();
+      
+      // Reset form
+      setSelectedApplication(null);
+      setFeedback("");
+      setIsRejectDialogOpen(false);
       
     } catch (error) {
       handleError(error);
@@ -162,6 +198,7 @@ const EmployerApplications = () => {
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="reviewing">Reviewing</TabsTrigger>
                 <TabsTrigger value="selected">Selected</TabsTrigger>
+                <TabsTrigger value="rejected">Rejected</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="space-y-4">
@@ -231,86 +268,137 @@ const EmployerApplications = () => {
                                   </DialogContent>
                                 </Dialog>
 
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button 
-                                      variant="default" 
-                                      size="sm"
-                                      onClick={() => setSelectedApplication(application)}
-                                    >
-                                      Schedule Interview
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                      <DialogTitle>Schedule Interview</DialogTitle>
-                                      <DialogDescription>
-                                        Set a date and time for the interview. The candidate will be notified via email.
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="grid gap-4 py-4">
-                                      <div className="grid grid-cols-4 items-center gap-4">
-                                        <Label htmlFor="interview-date" className="text-right">
-                                          Date
-                                        </Label>
-                                        <Input
-                                          id="interview-date"
-                                          type="date"
-                                          className="col-span-3"
-                                          value={interviewDate}
-                                          onChange={(e) => setInterviewDate(e.target.value)}
-                                          min={format(new Date(), "yyyy-MM-dd")}
-                                        />
-                                      </div>
-                                      <div className="grid grid-cols-4 items-center gap-4">
-                                        <Label htmlFor="interview-time" className="text-right">
-                                          Time
-                                        </Label>
-                                        <Input
-                                          id="interview-time"
-                                          type="time"
-                                          className="col-span-3"
-                                          value={interviewTime}
-                                          onChange={(e) => setInterviewTime(e.target.value)}
-                                        />
-                                      </div>
-                                    </div>
-                                    <DialogFooter>
-                                      <Button type="submit" onClick={handleScheduleInterview}>
-                                        Schedule and Notify
-                                      </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
+                                {application.status !== "rejected" && (
+                                  <>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Button 
+                                          variant="default" 
+                                          size="sm"
+                                          onClick={() => setSelectedApplication(application)}
+                                        >
+                                          Schedule Interview
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Schedule Interview</DialogTitle>
+                                          <DialogDescription>
+                                            Set a date and time for the interview. The candidate will be notified via email.
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="grid gap-4 py-4">
+                                          <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="interview-date" className="text-right">
+                                              Date
+                                            </Label>
+                                            <Input
+                                              id="interview-date"
+                                              type="date"
+                                              className="col-span-3"
+                                              value={interviewDate}
+                                              onChange={(e) => setInterviewDate(e.target.value)}
+                                              min={format(new Date(), "yyyy-MM-dd")}
+                                            />
+                                          </div>
+                                          <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="interview-time" className="text-right">
+                                              Time
+                                            </Label>
+                                            <Input
+                                              id="interview-time"
+                                              type="time"
+                                              className="col-span-3"
+                                              value={interviewTime}
+                                              onChange={(e) => setInterviewTime(e.target.value)}
+                                            />
+                                          </div>
+                                        </div>
+                                        <DialogFooter>
+                                          <Button type="submit" onClick={handleScheduleInterview}>
+                                            Schedule and Notify
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                    
+                                    <Dialog open={isRejectDialogOpen && selectedApplication?.id === application.id} onOpenChange={(open) => {
+                                      if (!open) setIsRejectDialogOpen(false);
+                                    }}>
+                                      <DialogTrigger asChild>
+                                        <Button 
+                                          variant="destructive" 
+                                          size="sm"
+                                          onClick={() => {
+                                            setSelectedApplication(application);
+                                            setIsRejectDialogOpen(true);
+                                          }}
+                                        >
+                                          Reject
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                          <DialogTitle>Reject Application</DialogTitle>
+                                          <DialogDescription>
+                                            Provide feedback to the applicant (optional). They will be notified of your decision.
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="py-4">
+                                          <Label htmlFor="feedback" className="mb-2 block">
+                                            Feedback (optional)
+                                          </Label>
+                                          <Textarea
+                                            id="feedback"
+                                            placeholder="Provide feedback to the candidate..."
+                                            value={feedback}
+                                            onChange={(e) => setFeedback(e.target.value)}
+                                            rows={4}
+                                          />
+                                        </div>
+                                        <DialogFooter>
+                                          <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+                                            Cancel
+                                          </Button>
+                                          <Button variant="destructive" onClick={handleRejectApplication}>
+                                            Reject Application
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </>
+                                )}
                                 
-                                <Select
-                                  onValueChange={(value) => {
-                                    // Update application status
-                                    if (userId) {
-                                      apiRequest(`/employers/${userId}/myApplications/${application.id}`, {
-                                        method: 'POST',
-                                        body: { status: value }
-                                      }).then(() => {
-                                        toast({
-                                          title: "Status updated",
-                                          description: `Application status updated to ${value}`
-                                        });
-                                        refetch();
-                                      }).catch(handleError);
-                                    }
-                                  }}
-                                  defaultValue={application.status}
-                                >
-                                  <SelectTrigger className="w-[120px] h-8">
-                                    <SelectValue placeholder="Change Status" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="reviewing">Reviewing</SelectItem>
-                                    <SelectItem value="selected">Selected</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                {application.status !== "rejected" && (
+                                  <Select
+                                    onValueChange={(value) => {
+                                      // Update application status
+                                      if (userId) {
+                                        apiRequest(`/employers/${userId}/myApplications/${application.id}`, {
+                                          method: 'POST',
+                                          body: { status: value }
+                                        }).then(() => {
+                                          toast({
+                                            title: "Status updated",
+                                            description: `Application status updated to ${value}`
+                                          });
+                                          refetch();
+                                        }).catch(handleError);
+                                      }
+                                    }}
+                                    defaultValue={application.status}
+                                  >
+                                    <SelectTrigger className="w-[120px] h-8">
+                                      <SelectValue placeholder="Change Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="reviewing">Reviewing</SelectItem>
+                                      <SelectItem value="selected">Selected</SelectItem>
+                                      <SelectItem value="rejected">Rejected</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -328,13 +416,15 @@ const EmployerApplications = () => {
               {/* Other tabs would have filtered content based on status */}
               <TabsContent value="pending" className="space-y-4">
                 {/* Same table but filtered for pending status */}
-                {/* This is handled by the statusFilter state */}
               </TabsContent>
               <TabsContent value="reviewing" className="space-y-4">
                 {/* Same table but filtered for reviewing status */}
               </TabsContent>
               <TabsContent value="selected" className="space-y-4">
                 {/* Same table but filtered for selected status */}
+              </TabsContent>
+              <TabsContent value="rejected" className="space-y-4">
+                {/* Same table but filtered for rejected status */}
               </TabsContent>
             </Tabs>
           </CardContent>
