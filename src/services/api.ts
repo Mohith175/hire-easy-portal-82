@@ -1,105 +1,88 @@
 
-// API base URL - Replace with your actual Spring Boot backend URL
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+/**
+ * API utility for making requests to the Spring Boot backend
+ */
+import { toast } from "@/components/ui/use-toast";
 
-interface ApiOptions {
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+export interface ApiError extends Error {
+  status?: number;
+  isConnectionError?: boolean;
+}
+
+type RequestOptions = {
   method?: string;
   headers?: Record<string, string>;
   body?: any;
-}
-
-// Get the auth token from localStorage
-const getAuthToken = (): string | null => {
-  try {
-    const user = localStorage.getItem("user");
-    if (!user) return null;
-    
-    const userData = JSON.parse(user);
-    return userData.token || null;
-  } catch (error) {
-    console.error("Error retrieving auth token:", error);
-    return null;
-  }
+  requiresAuth?: boolean;
 };
 
-// Handle API responses and errors consistently
-export const apiRequest = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T> => {
+export async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  const { method = 'GET', body, requiresAuth = true } = options;
+  
+  // Get stored user data to retrieve JWT token
+  const userJson = localStorage.getItem('user');
+  const user = userJson ? JSON.parse(userJson) : null;
+  const token = user?.token;
+  
+  // Setup headers with authentication if required
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  
+  if (requiresAuth && token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
   try {
-    const token = getAuthToken();
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    let requestOptions: RequestInit = {
-      method: options.method || 'GET',
+    // Prepare request configuration
+    const requestOptions: RequestInit = {
+      method,
       headers,
+      credentials: 'include',
     };
     
-    // Handle body based on content type
-    if (options.body) {
-      if (options.body instanceof FormData) {
-        // For FormData (file uploads), don't set Content-Type (browser will set it with boundary)
-        delete headers['Content-Type'];
-        requestOptions.body = options.body;
-      } else {
-        requestOptions.body = JSON.stringify(options.body);
-      }
+    // Add request body if provided
+    if (body) {
+      requestOptions.body = JSON.stringify(body);
     }
     
-    console.log(`Making API request to ${API_URL}${endpoint}`);
-    const response = await fetch(`${API_URL}${endpoint}`, requestOptions);
+    // Make the API call
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, requestOptions);
     
+    // Handle HTTP errors
     if (!response.ok) {
-      let errorMessage = `API error: ${response.statusText}`;
-      
+      // Parse error response if available
+      let errorData;
       try {
-        // Try to parse error response
-        const errorData = await response.json();
-        errorMessage = errorData.message || errorMessage;
-      } catch {
-        // If response isn't JSON, use status text
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: 'Unknown error occurred' };
       }
       
-      const error = new Error(errorMessage);
-      (error as any).status = response.status;
+      const error = new Error(errorData.message || `API error: ${response.status}`) as ApiError;
+      error.status = response.status;
       throw error;
     }
     
-    // For no content responses
-    if (response.status === 204) {
+    // For DELETE requests or those that don't return content
+    if (response.status === 204 || method === 'DELETE') {
       return {} as T;
     }
     
-    return await response.json() as T;
+    // Parse successful response
+    return await response.json();
   } catch (error: any) {
-    // Check if it's a network error (failed to fetch)
-    if (error.message === 'Failed to fetch') {
-      console.error(`API connection failed to ${API_URL}${endpoint}. Backend may be unavailable.`);
-      error.isConnectionError = true;
+    // Handle connection errors
+    if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+      const connectionError = new Error('Cannot connect to the server. Please check your internet connection.') as ApiError;
+      connectionError.isConnectionError = true;
+      throw connectionError;
     }
     
-    console.error('API request failed:', error);
+    // Re-throw the error
     throw error;
   }
-};
-
-// Authentication API functions
-export const login = async (email: string, password: string) => {
-  return apiRequest('/auth/login', {
-    method: 'POST',
-    body: { email, password }
-  });
-};
-
-export const register = async (userData: any) => {
-  return apiRequest('/auth/signin', {
-    method: 'POST',
-    body: userData
-  });
-};
+}

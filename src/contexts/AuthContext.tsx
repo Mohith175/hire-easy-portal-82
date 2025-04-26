@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { apiRequest } from "@/services/api";
+import { login, register, RegisterData } from "@/services/authService";
 
 export interface AuthUser {
   id: number;
@@ -14,22 +14,13 @@ export interface AuthUser {
 
 export type UserRole = "ADMIN" | "EMPLOYER" | "EMPLOYEE" | "*";
 
-interface LoginResponse {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  token: string;
-  role: UserRole;
-}
-
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (userData: Partial<AuthUser>) => Promise<boolean>;
+  register: (userData: RegisterData) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,13 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const handleLogin = async (email: string, password: string): Promise<boolean> => {
     try {
       // Make API call to Spring Boot backend
-      const response = await apiRequest<LoginResponse>('/auth/login', {
-        method: 'POST',
-        body: { email, password }
-      });
+      const response = await login(email, password);
       
       // Create user object from response
       const loggedInUser: AuthUser = {
@@ -75,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastName: response.lastName,
         email: response.email,
         token: response.token,
-        role: response.role
+        role: response.role as UserRole
       };
       
       setUser(loggedInUser);
@@ -100,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("user");
     toast({
@@ -109,13 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const register = async (userData: Partial<AuthUser>): Promise<boolean> => {
+  const handleRegister = async (userData: RegisterData): Promise<boolean> => {
     try {
       // Make API call to Spring Boot backend
-      await apiRequest('/auth/signin', {
-        method: 'POST',
-        body: userData
-      });
+      await register(userData);
       
       toast({
         title: "Registration successful",
@@ -142,9 +127,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user, 
         isAuthenticated: !!user, 
         isLoading,
-        login, 
-        logout,
-        register
+        login: handleLogin, 
+        logout: handleLogout,
+        register: handleRegister
       }}
     >
       {children}

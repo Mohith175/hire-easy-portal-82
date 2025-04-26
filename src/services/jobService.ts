@@ -1,6 +1,11 @@
 
 import { apiRequest } from './api';
 
+// Types for job related data
+export type JobStatus = "active" | "inactive" | "closed";
+export type JobType = "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP" | "REMOTE";
+export type ApplicationStatus = "pending" | "reviewing" | "shortlisted" | "selected" | "rejected";
+
 export interface JobCategory {
   id: string;
   title: string;
@@ -11,160 +16,215 @@ export interface Job {
   id: string;
   title: string;
   description: string;
-  company_name: string;
+  requirements: string;
+  responsibilities: string;
   location: string;
-  job_type: string;
-  salary_range?: string;
-  employer_id: string;
-  created_at: string;
-  experience?: string;
-  skills?: string;
-  city?: string;
-  country?: string;
+  salary: string;
+  company: string;
+  companyDescription?: string;
+  postedDate: string;
+  deadline: string;
+  jobType: JobType;
+  status: JobStatus;
+  categoryId: string;
+  employerId: string;
+  categoryName?: string;
+  applicationsCount?: number;
 }
-
-export type ApplicationStatus = 'pending' | 'reviewing' | 'selected' | 'rejected' | 'shortlisted';
 
 export interface JobApplication {
   id: string;
   jobId: string;
-  userId: string;
+  employeeId: string;
+  resumeId: string;
   status: ApplicationStatus;
   appliedDate: string;
-  resumeId: string;
   feedback?: string;
   jobTitle?: string;
 }
 
 export interface Resume {
   id: string;
-  fileName: string;
-  fileUrl: string;
-  uploadedAt: string;
-  userId: string;
-  file_name?: string;  // Backend property name
-  uploaded_at?: string; // Backend property name
+  employeeId: string;
+  file_name?: string;
+  fileName?: string;
+  uploaded_at: string;
+  file_url?: string;
+  fileUrl?: string;
 }
 
-// Job Categories API
-export const getJobCategories = () => {
-  return apiRequest<JobCategory[]>('/jobCategories');
-};
+export interface EmployeeProfile {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  address?: string;
+  skills?: string[];
+  qualifications?: Qualification[];
+  workExperiences?: WorkExperience[];
+}
 
-export const createJobCategory = (category: Omit<JobCategory, 'id'>) => {
+export interface Qualification {
+  id?: string;
+  degree: string;
+  institution: string;
+  graduationYear: number;
+}
+
+export interface WorkExperience {
+  id?: string;
+  company: string;
+  position: string;
+  startDate: string;
+  endDate?: string;
+  description: string;
+}
+
+// Job Category APIs
+export async function getJobCategories(): Promise<JobCategory[]> {
+  return apiRequest<JobCategory[]>('/jobCategories');
+}
+
+export async function createJobCategory(category: Partial<JobCategory>): Promise<JobCategory> {
   return apiRequest<JobCategory>('/jobCategories', {
     method: 'POST',
-    body: category,
+    body: category
   });
-};
+}
 
-export const updateJobCategory = (id: string, category: Partial<JobCategory>) => {
+export async function updateJobCategory(id: string, category: Partial<JobCategory>): Promise<JobCategory> {
   return apiRequest<JobCategory>(`/jobCategories/${id}`, {
     method: 'PUT',
-    body: category,
+    body: category
   });
-};
+}
 
-export const deleteJobCategory = (id: string) => {
-  return apiRequest(`/jobCategories/${id}`, {
-    method: 'DELETE',
+export async function deleteJobCategory(id: string): Promise<void> {
+  return apiRequest<void>(`/jobCategories/${id}`, {
+    method: 'DELETE'
   });
-};
+}
 
-// Jobs API
-export const getAllJobs = () => {
-  return apiRequest<Job[]>('/jobs');
-};
+// Jobs APIs
+export async function getJobs(params?: Record<string, string>): Promise<Job[]> {
+  const queryParams = params ? new URLSearchParams(params).toString() : '';
+  const endpoint = queryParams ? `/jobs?${queryParams}` : '/jobs';
+  return apiRequest<Job[]>(endpoint);
+}
 
-// This is needed for Jobs.tsx
-export const getJobs = () => {
-  return apiRequest<Job[]>('/jobs');
-};
-
-export const getJobById = (id: string) => {
+export async function getJobById(id: string): Promise<Job> {
   return apiRequest<Job>(`/jobs/${id}`);
-};
+}
 
-export const getEmployerJobs = (employerId: string) => {
-  return apiRequest<Job[]>(`/employers/${employerId}/jobs`);
-};
+export async function searchJobs(category?: string, location?: string, type?: string): Promise<Job[]> {
+  const params = new URLSearchParams();
+  if (category) params.append('category', category);
+  if (location) params.append('location', location);
+  if (type) params.append('type', type);
+  
+  return apiRequest<Job[]>(`/jobs/search?${params.toString()}`);
+}
 
-// This is needed for MyJobs.tsx
-export const getUserJobs = (userId: string) => {
-  return apiRequest<Job[]>(`/employers/${userId}/jobs`);
-};
-
-export const createJob = (employerId: string, job: Omit<Job, 'id' | 'created_at' | 'employer_id'>) => {
+export async function createJob(employerId: string, job: Partial<Job>): Promise<Job> {
   return apiRequest<Job>(`/employers/${employerId}/jobs`, {
     method: 'POST',
-    body: job,
+    body: job
   });
-};
+}
 
-export const deleteJob = (employerId: string, jobId: string) => {
-  return apiRequest(`/employers/${employerId}/jobs/${jobId}`, {
-    method: 'DELETE',
+export async function deleteJob(employerId: string, jobId: string): Promise<void> {
+  return apiRequest<void>(`/employers/${employerId}/jobs/${jobId}`, {
+    method: 'DELETE'
   });
-};
+}
 
-// Job Applications API
-export const getUserApplications = (employeeId: string) => {
-  return apiRequest<JobApplication[]>(`/employees/${employeeId}/jobs/yourApplications`);
-};
+export async function getEmployerJobs(employerId: string): Promise<Job[]> {
+  return apiRequest<Job[]>(`/employers/${employerId}/jobs`);
+}
 
-export const getEmployerApplications = (employerId: string) => {
-  return apiRequest<JobApplication[]>(`/employers/${employerId}/myApplications`);
-};
+// Job Applications APIs
+export async function getAllApplications(): Promise<JobApplication[]> {
+  return apiRequest<JobApplication[]>('/jobs/jobApplications');
+}
 
-export const updateApplicationStatus = (
-  employerId: string,
-  applicationId: string,
-  status: ApplicationStatus
-) => {
-  return apiRequest<JobApplication>(`/employers/${employerId}/myApplications/${applicationId}`, {
-    method: 'POST',
-    body: { status },
-  });
-};
-
-export const applyForJob = (employeeId: string, jobId: string, resumeId: string) => {
+export async function applyForJob(employeeId: string, jobId: string, resumeId: string): Promise<JobApplication> {
   return apiRequest<JobApplication>(`/employees/${employeeId}/jobs/${jobId}/apply`, {
     method: 'POST',
-    body: { resumeId },
+    body: { resumeId }
   });
-};
+}
 
-export const searchJobs = (params: {
-  category?: string;
-  location?: string;
-  type?: string;
-}) => {
-  const searchParams = new URLSearchParams();
-  if (params.category) searchParams.append('category', params.category);
-  if (params.location) searchParams.append('location', params.location);
-  if (params.type) searchParams.append('type', params.type);
-  
-  return apiRequest<Job[]>(`/jobs/search?${searchParams.toString()}`);
-};
+export async function getUserApplications(employeeId: string): Promise<JobApplication[]> {
+  return apiRequest<JobApplication[]>(`/employees/${employeeId}/jobs/yourApplications`);
+}
 
-// Resume API
-export const getUserResumes = (userId: string) => {
-  return apiRequest<Resume[]>(`/employees/${userId}/resumes`);
-};
+export async function getEmployerApplications(employerId: string): Promise<JobApplication[]> {
+  return apiRequest<JobApplication[]>(`/employers/${employerId}/myApplications`);
+}
 
-export const uploadResume = (userId: string, file: File) => {
+export async function updateApplicationStatus(employerId: string, applicationId: string, status: ApplicationStatus, feedback?: string): Promise<JobApplication> {
+  return apiRequest<JobApplication>(`/employers/${employerId}/myApplications/${applicationId}`, {
+    method: 'POST',
+    body: { status, feedback }
+  });
+}
+
+// Resume APIs
+export async function getUserResumes(employeeId: string): Promise<Resume[]> {
+  return apiRequest<Resume[]>(`/employees/${employeeId}/resumes`);
+}
+
+export async function uploadResume(employeeId: string, file: File): Promise<Resume> {
   const formData = new FormData();
   formData.append('file', file);
   
-  return apiRequest<Resume>(`/employees/${userId}/resumes`, {
+  // For FormData we need to remove the Content-Type header so browser can set it with boundary
+  return apiRequest<Resume>(`/employees/${employeeId}/resumes`, {
     method: 'POST',
     body: formData,
-    headers: {} // Let the browser set the content-type with boundary
+    headers: {
+      'Content-Type': undefined as any
+    }
   });
-};
+}
 
-export const deleteResume = (userId: string, resumeId: string) => {
-  return apiRequest(`/employees/${userId}/resumes/${resumeId}`, {
-    method: 'DELETE',
+export async function deleteResume(employeeId: string, resumeId: string): Promise<void> {
+  return apiRequest<void>(`/employees/${employeeId}/resumes/${resumeId}`, {
+    method: 'DELETE'
   });
-};
+}
+
+// Employee Profile APIs
+export async function getEmployeeProfile(employeeId: string): Promise<EmployeeProfile> {
+  return apiRequest<EmployeeProfile>(`/employees/${employeeId}`);
+}
+
+export async function updateEmployeeProfile(employeeId: string, profileData: Partial<EmployeeProfile>): Promise<EmployeeProfile> {
+  return apiRequest<EmployeeProfile>(`/employees/${employeeId}/profileDetails`, {
+    method: 'POST',
+    body: profileData
+  });
+}
+
+export async function updateEmployeeSkills(employeeId: string, skills: string[]): Promise<EmployeeProfile> {
+  return apiRequest<EmployeeProfile>(`/employees/${employeeId}/skills`, {
+    method: 'POST',
+    body: { skills }
+  });
+}
+
+export async function updateEmployeeQualifications(employeeId: string, qualifications: Qualification[]): Promise<EmployeeProfile> {
+  return apiRequest<EmployeeProfile>(`/employees/${employeeId}/qualifications`, {
+    method: 'POST',
+    body: { qualifications }
+  });
+}
+
+export async function updateEmployeeWorkExperience(employeeId: string, workExperiences: WorkExperience[]): Promise<EmployeeProfile> {
+  return apiRequest<EmployeeProfile>(`/employees/${employeeId}/workExperiences`, {
+    method: 'POST',
+    body: { workExperiences }
+  });
+}
