@@ -1,7 +1,7 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { CheckCheck, Clock, ClipboardList, AlertTriangle, X } from "lucide-react";
 import { ApplicationStatus as StatusType } from "@/services/jobService";
 
@@ -73,8 +73,13 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ status, showProgr
         <div className="mt-2">
           <Progress
             value={getProgressValue()}
-            className={`h-1.5 ${status === "rejected" ? "bg-red-100" : "bg-blue-100"}`}
-            indicatorClassName={status === "rejected" ? "bg-red-500" : undefined}
+            className={cn(
+              "h-1.5", 
+              status === "rejected" ? "bg-red-100" : "bg-blue-100"
+            )}
+            indicator={cn(
+              status === "rejected" ? "bg-red-500" : undefined
+            )}
           />
         </div>
       )}
