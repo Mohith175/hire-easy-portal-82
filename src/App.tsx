@@ -39,10 +39,12 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      onError: (error: any) => {
-        // Check for connection errors to show friendlier messages
-        if (error.isConnectionError) {
-          console.error("Backend connection error detected");
+      meta: {
+        onError: (error: any) => {
+          // Check for connection errors to show friendlier messages
+          if (error.isConnectionError) {
+            console.error("Backend connection error detected");
+          }
         }
       }
     },
